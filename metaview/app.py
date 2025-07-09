@@ -1,29 +1,20 @@
-import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
-from gi.repository import Gtk, Adw
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
+import sys
 
-class MainWindow(Gtk.ApplicationWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.set_default_size(500, 600)
-        self.set_title("MetaView")
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
         
-        self.box1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.set_child(self.box1)
+        self.setWindowTitle("MetaView")
+        button = QPushButton("Click me!")
         
-        self.button = Gtk.Button(label="Click me!")
-        self.box1.append(self.button)
-        self.button.connect("clicked", self.hello)
-        
-    def hello(self, button):
-        print("Hello World!")
-        
-class MetaView(Adw.Application):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.connect("activate", self.on_activate)
-        
-    def on_activate(self, app):
-        self.win = MainWindow(application=app)
-        self.win.present()
+        self.setCentralWidget(button)
+
+def main():
+    app = QApplication(sys.argv)
+
+    window = MainWindow()
+    window.show()
+
+    app.exec()
