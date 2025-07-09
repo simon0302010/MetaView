@@ -19,5 +19,8 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 
+[project.optional-dependencies]
+3d = ["pyopengl", "numpy-stl", "pyqtgraph"]
+
 [project.urls]
 Homepage = "https://github.com/simon0302010/MetaView"
