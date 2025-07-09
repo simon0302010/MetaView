@@ -7,7 +7,8 @@ from PyQt5.QtWidgets import (
     QWidget,
     QLabel,
     QFrame,
-    QScrollArea
+    QScrollArea,
+    QFileDialog
 )
 import sys
 
@@ -21,6 +22,27 @@ class MetaView(QMainWindow):
         self.layoutV.setSpacing(0)
         self.layoutV.setContentsMargins(0,0,0,0)
         self.text_rows = []
+        
+        label = QLabel("Open a file to get started.")
+        label.setAlignment(Qt.AlignCenter)
+        
+        menu = self.menuBar()
+        file_menu = menu.addMenu("&File")
+        
+        open_action = file_menu.addAction("Open")
+        open_action.triggered.connect(self.open_file)
+        
+        self.setCentralWidget(label)
+
+    def open_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open File",
+            "",
+            "Images (*.jpg *.jpeg *.png)"
+        )
+        if not file_path:
+            return
 
         self.add_text_row("Property", "Value")
 
