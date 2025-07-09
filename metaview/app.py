@@ -2,10 +2,12 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
-    QPushButton,
     QVBoxLayout,
     QHBoxLayout,
-    QWidget
+    QWidget,
+    QLabel,
+    QFrame,
+    QScrollArea
 )
 import sys
 
@@ -15,37 +17,58 @@ class MetaView(QMainWindow):
         self.setWindowTitle("MetaView")
         self.setMinimumSize(QSize(400, 550))
         
-        layout = QHBoxLayout()
-        layoutV1 = QVBoxLayout()
-        layoutV2 = QVBoxLayout()
-        
-        layout.addLayout(layoutV1)
-        layout.addLayout(layoutV2)
-        
-        self.button1 = QPushButton("Click me!")
-        self.button1.clicked.connect(self.clicked_button1)
-        
-        self.button2 = QPushButton("Click me!")
-        self.button2.clicked.connect(self.clicked_button2)
-        
-        layoutV1.addWidget(self.button1, alignment=Qt.AlignTop)
-        layoutV2.addWidget(self.button2, alignment=Qt.AlignTop)
+        self.layoutV = QVBoxLayout()
+        self.layoutV.setSpacing(0)
+        self.layoutV.setContentsMargins(0,0,0,0)
+        self.text_rows = []
 
-        widget = QWidget()
-        widget.setLayout(layout)
+        self.add_text_row("Property", "Value")
 
-        self.setCentralWidget(widget)
+        for i in range(5):
+            self.add_text_row(str(i), str(i))
 
-    def clicked_button1(self):
-        print("Clicked button 1")
-    
-    def clicked_button2(self):
-        print("Clicked button 2")
+        self.layoutV.addStretch()
+
+        content_widget = QWidget()
+        content_widget.setLayout(self.layoutV)
+        
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(content_widget)
+        
+        self.setCentralWidget(scroll)
+
+    def add_text_row(self, text1="", text2=""):
+        row_widget = QWidget()
+        row_layout = QVBoxLayout()
+        row_layout.setSpacing(0)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+
+        layoutH = QHBoxLayout()
+        layoutH.setSpacing(10)
+        layoutH.setContentsMargins(8, 0, 8, 0)
+        label1 = QLabel(text1)
+        label2 = QLabel(text2)
+        layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
+        layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
+        row_layout.addLayout(layoutH)
+
+        # separator line
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        line.setStyleSheet("color: gray; background-color: gray;")
+        line.setFixedHeight(2)
+        row_layout.addWidget(line)
+
+        row_widget.setLayout(row_layout)
+        row_widget.setMinimumHeight(32)
+
+        self.layoutV.addWidget(row_widget)
+        self.text_rows.append((label1, label2))
 
 def main():
     app = QApplication(sys.argv)
-
     window = MetaView()
     window.show()
-
     app.exec()
