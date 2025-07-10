@@ -16,7 +16,7 @@ class NonInteractiveGLViewWidget(GLViewWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     view = NonInteractiveGLViewWidget()
-    stl_mesh = mesh.Mesh.from_file('Eiffel_tower_sample.STL')
+    stl_mesh = mesh.Mesh.from_file(sys.argv[1])
 
     points = stl_mesh.points.reshape(-1, 3)
     faces = np.arange(points.shape[0]).reshape(-1, 3)
