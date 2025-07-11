@@ -16,7 +16,11 @@ class NonInteractiveGLViewWidget(GLViewWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     view = NonInteractiveGLViewWidget()
-    stl_mesh = mesh.Mesh.from_file(sys.argv[1])
+    try:
+        stl_mesh = mesh.Mesh.from_file(sys.argv[1])
+    except IndexError:
+        print("Please provide the path to a 3D model.")
+        sys.exit(1)
 
     points = stl_mesh.points.reshape(-1, 3)
     faces = np.arange(points.shape[0]).reshape(-1, 3)
