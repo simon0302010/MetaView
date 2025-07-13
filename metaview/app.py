@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QFileDialog
 )
+import subprocess
+import json
 import sys
 
 class MetaView(QMainWindow):
@@ -35,21 +37,23 @@ class MetaView(QMainWindow):
         self.setCentralWidget(label)
 
     def open_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(
+        self.file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Open File",
             "",
             "Images (*.jpg *.jpeg *.png)"
         )
-        if not file_path:
+        if not self.file_path:
             return
 
-        print(f"Selected File: {file_path}")
+        print(f"Selected File: {self.file_path}")
 
         self.add_text_row("Property", "Value", header=True)
 
-        for i in range(5):
-            self.add_text_row(str(i), str(i))
+        self.metadata = self.get_metadata()
+
+        for key, value in self.metadata.items():
+            self.add_text_row(str(key), str(value))
 
         self.layoutV.addStretch()
 
@@ -95,6 +99,22 @@ class MetaView(QMainWindow):
 
         self.layoutV.addWidget(row_widget)
         self.text_rows.append((label1, label2))
+
+    def get_metadata(self, file_path=None):
+        if file_path:
+            pass
+        elif hasattr(self, "file_path"):
+            file_path = self.file_path
+        else:
+            print("Please load a file first.")
+            return
+
+        result = subprocess.run(
+            ["exiftool", "-j", self.file_path],
+            capture_output=True, text=True
+        )
+        self.metadata = json.loads(result.stdout)
+        return self.metadata[0] if self.metadata else {}
 
 def main():
     app = QApplication(sys.argv)

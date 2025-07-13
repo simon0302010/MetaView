@@ -16,5 +16,8 @@ except IndexError:
     print("Please provide the path to an image file")
     sys.exit(1)
 
+print(exif_data)
 for key, value in exif_data.items():
-    print(f"{key}: {value}")
+    if key == "Model":
+        print(f"{key}: {value}")
+    #print(f"{key}: {value}")
