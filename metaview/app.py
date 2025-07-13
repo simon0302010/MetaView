@@ -16,7 +16,7 @@ import json
 import sys
 
 class MetaView(QMainWindow):
-    def __init__(self):
+    def __init__(self, file_path=None):
         super().__init__()
         self.setWindowTitle("MetaView")
         self.setMinimumSize(QSize(400, 550))
@@ -32,13 +32,19 @@ class MetaView(QMainWindow):
         
         self.setCentralWidget(label)
 
-    def open_file(self):
-        self.file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open File",
-            "",
-            "Images (*.jpg *.jpeg *.png)"
-        )
+        if file_path:
+            self.open_file(file_path)
+
+    def open_file(self, file_path=None):
+        if file_path:
+            self.file_path = file_path
+        else:
+            self.file_path, _ = QFileDialog.getOpenFileName(
+                self,
+                "Open File",
+                "",
+                "Images (*.jpg *.jpeg *.png)"
+            )
         if not self.file_path:
             return
 
@@ -46,10 +52,79 @@ class MetaView(QMainWindow):
 
         self.metadata = self.get_metadata()
 
-        categories = self.categorize_metadata(self.metadata)
+        self.categories_dict = {
+            "General": [
+                "FileName", "SourceFile", "FileType",
+                "ImageSize", "Megapixels",
+                "FileSize", "Directory", "FilePermissions", "FileModifyDate", "FileAccessDate", "FileInodeChangeDate"
+            ],
+
+            "Camera": [
+                "Make", "Model", "SerialNumber", "LensID", "ShutterSpeed",
+                "Aperture", "ApertureValue", "FNumber", "MaxApertureValue", "FocalLength", "FocalLengthIn35mmFormat",
+                "ScaleFactor35efl", "CircleOfConfusion", "DOF", "FOV", "HyperfocalDistance"
+            ],
+
+            "Exposure": [
+                "ExposureTime", "ExposureCompensation", "ExposureMode", "ExposureProgram", "ISO", "SensitivityType",
+                "LightValue", "MeteringMode", "Flash", "WhiteBalance", "SceneCaptureType", "Contrast",
+                "Saturation", "Sharpness", "GainControl", "SubjectDistance", "SubjectDistanceRange"
+            ],
+
+            "Image Processing": [
+                "Software", "ModifyDate", "ColorSpace", "ColorMode", "RenderingIntent", "Compression", "ICCProfileName",
+                "ProfileDescription", "ProfileVersion", "CreatorTool", "WriterName", "ReaderName", "PhotoshopQuality",
+                "PhotoshopFormat", "HasRealMergedData", "AlreadyApplied", "HasSettings", "HasCrop", "ToneCurveName",
+                "ToneCurve", "Clarity", "Vibrance", "FillLight", "Brightness", "HighlightRecovery", "Shadows",
+                "ColorTemperature", "Tint", "Defringe", "LuminanceSmoothing", "ColorNoiseReduction", "SharpenRadius",
+                "SharpenDetail", "SharpenEdgeMasking", "PostCropVignetteAmount", "ConvertToGrayscale", "CameraProfile",
+                "LensProfileName", "LensProfileEnable"
+            ],
+
+            "Date & Time": [
+                "DateTimeOriginal", "CreateDate", "ModifyDate", "DateCreated", "MetadataDate",
+                "SubSecTime", "SubSecTimeOriginal", "SubSecTimeDigitized", "SubSecCreateDate",
+                "SubSecModifyDate", "SubSecDateTimeOriginal", "DateTimeCreated", "TimeCreated"
+            ],
+
+            "Author & Rights": [
+                "Artist", "Creator", "By-line", "Copyright", "CopyrightNotice", "Rights", "Credit", "Source"
+            ],
+
+            "Location": [
+                "GPSLatitude", "GPSLongitude", "GPSAltitude", "GPSDateStamp", "GPSDateTime", "GPSLatitudeRef",
+                "GPSLongitudeRef", "GPSAltitudeRef", "GPSMapDatum", "GPSProcessingMethod"
+            ],
+
+            "Editing History": [
+                "History", "HistoryAction", "HistorySoftwareAgent",
+                "HistoryChanged", "HistoryParameters"
+            ],
+
+            "XMP & IPTC": [
+                "XMPToolkit", "DocumentID", "InstanceID", "OriginalDocumentID", "DerivedFromInstanceID",
+                "DerivedFromDocumentID", "DerivedFromOriginalDocumentID", "ApplicationRecordVersion",
+                "CodedCharacterSet", "IPTCDigest", "CurrentIPTCDigest"
+            ],
+
+            "Advanced / Technical": [
+                "ExifToolVersion", "ExifVersion", "ExifByteOrder", "EncodingProcess", "BitsPerSample",
+                "ColorComponents", "YCbCrSubSampling", "Orientation", "SensingMethod", "SceneType",
+                "CustomRendered", "CFAPattern", "FileSource", "DigitalZoomRatio", "SensingMethod",
+                "ProfileClass", "ProfileFileSignature", "ProfileCreator", "ProfileID", "ProfileCMMType",
+                "ProfileConnectionSpace", "ProfileDateTime", "DeviceManufacturer", "DeviceModel",
+                "DeviceAttributes", "ConnectionSpaceIlluminant", "MediaWhitePoint", "MediaBlackPoint"
+            ],
+
+            "Thumbnails": [
+                "ThumbnailImage", "ThumbnailOffset", "ThumbnailLength", "PhotoshopThumbnail"
+            ]
+        }
+
+        self.categories = self.categorize_metadata(self.metadata)
 
         tab_widget = QTabWidget()
-        for category, items in categories.items():
+        for category, items in self.categories.items():
             widget = QWidget()
             layout = QVBoxLayout()
             layout.setSpacing(0)
@@ -107,10 +182,23 @@ class MetaView(QMainWindow):
         self.setCentralWidget(tab_widget)
 
     def categorize_metadata(self, metadata):
-        categories = {}
+        categories = {cat: {} for cat in self.categories_dict}
+        uncategorized = {}
+
         for key, value in metadata.items():
-            cat, subkey = "General", key
-            categories.setdefault(cat, {})[subkey] = value
+            found = False
+            for cat, keys in self.categories_dict.items():
+                if key in keys:
+                    categories[cat][key] = value
+                    found = True
+                    break
+            if not found:
+                uncategorized[key] = value
+
+        if uncategorized:
+            categories["Other"] = uncategorized
+
+        categories = {cat: items for cat, items in categories.items() if items}
         return categories
 
     def get_metadata(self, file_path=None):
@@ -131,6 +219,9 @@ class MetaView(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    window = MetaView()
+    try:
+        window = MetaView(sys.argv[1])
+    except IndexError:
+        window = MetaView()
     window.show()
     app.exec()
