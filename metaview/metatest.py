@@ -1,5 +1,6 @@
 import subprocess
 import json
+import sys
 
 def get_exif_with_exiftool(filename):
     result = subprocess.run(
@@ -9,6 +10,11 @@ def get_exif_with_exiftool(filename):
     data = json.loads(result.stdout)
     return data[0] if data else {}
 
-exif_data = get_exif_with_exiftool("Xbox360.png")
+try:
+    exif_data = get_exif_with_exiftool(sys.argv[1])
+except IndexError:
+    print("Please provide the path to an image file")
+    sys.exit(1)
+
 for key, value in exif_data.items():
     print(f"{key}: {value}")
