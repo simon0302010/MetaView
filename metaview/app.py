@@ -1,35 +1,37 @@
+import json
+import subprocess
+import sys
+
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (
     QApplication,
-    QMainWindow,
-    QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-    QLabel,
-    QFrame,
-    QScrollArea,
     QFileDialog,
-    QTabWidget
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QScrollArea,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
 )
-import subprocess
-import json
-import sys
+
 
 class MetaView(QMainWindow):
     def __init__(self, file_path=None):
         super().__init__()
         self.setWindowTitle("MetaView")
         self.setMinimumSize(QSize(400, 550))
-        
+
         label = QLabel("Open a file to get started.")
         label.setAlignment(Qt.AlignCenter)
-        
+
         menu = self.menuBar()
         file_menu = menu.addMenu("&File")
-        
+
         open_action = file_menu.addAction("Open")
         open_action.triggered.connect(self.open_file)
-        
+
         self.setCentralWidget(label)
 
         if file_path:
@@ -40,10 +42,7 @@ class MetaView(QMainWindow):
             self.file_path = file_path
         else:
             self.file_path, _ = QFileDialog.getOpenFileName(
-                self,
-                "Open File",
-                "",
-                "Images (*.jpg *.jpeg *.png)"
+                self, "Open File", "", "Images (*.jpg *.jpeg *.png)"
             )
         if not self.file_path:
             return
@@ -54,71 +53,189 @@ class MetaView(QMainWindow):
 
         self.categories_dict = {
             "General": [
-                "FileName", "SourceFile", "FileType",
-                "ImageSize", "Megapixels",
-                "FileSize", "Directory", "FilePermissions", "FileModifyDate", "FileAccessDate", "FileInodeChangeDate"
+                "FileName",
+                "SourceFile",
+                "FileType",
+                "ImageSize",
+                "Megapixels",
+                "FileSize",
+                "Directory",
+                "FilePermissions",
+                "FileModifyDate",
+                "FileAccessDate",
+                "FileInodeChangeDate",
             ],
-
             "Camera": [
-                "Make", "Model", "SerialNumber", "LensID", "ShutterSpeed",
-                "Aperture", "ApertureValue", "FNumber", "MaxApertureValue", "FocalLength", "FocalLengthIn35mmFormat",
-                "ScaleFactor35efl", "CircleOfConfusion", "DOF", "FOV", "HyperfocalDistance"
+                "Make",
+                "Model",
+                "SerialNumber",
+                "LensID",
+                "ShutterSpeed",
+                "Aperture",
+                "ApertureValue",
+                "FNumber",
+                "MaxApertureValue",
+                "FocalLength",
+                "FocalLengthIn35mmFormat",
+                "ScaleFactor35efl",
+                "CircleOfConfusion",
+                "DOF",
+                "FOV",
+                "HyperfocalDistance",
             ],
-
             "Exposure": [
-                "ExposureTime", "ExposureCompensation", "ExposureMode", "ExposureProgram", "ISO", "SensitivityType",
-                "LightValue", "MeteringMode", "Flash", "WhiteBalance", "SceneCaptureType", "Contrast",
-                "Saturation", "Sharpness", "GainControl", "SubjectDistance", "SubjectDistanceRange"
+                "ExposureTime",
+                "ExposureCompensation",
+                "ExposureMode",
+                "ExposureProgram",
+                "ISO",
+                "SensitivityType",
+                "LightValue",
+                "MeteringMode",
+                "Flash",
+                "WhiteBalance",
+                "SceneCaptureType",
+                "Contrast",
+                "Saturation",
+                "Sharpness",
+                "GainControl",
+                "SubjectDistance",
+                "SubjectDistanceRange",
             ],
-
             "Image Processing": [
-                "Software", "ModifyDate", "ColorSpace", "ColorMode", "RenderingIntent", "Compression", "ICCProfileName",
-                "ProfileDescription", "ProfileVersion", "CreatorTool", "WriterName", "ReaderName", "PhotoshopQuality",
-                "PhotoshopFormat", "HasRealMergedData", "AlreadyApplied", "HasSettings", "HasCrop", "ToneCurveName",
-                "ToneCurve", "Clarity", "Vibrance", "FillLight", "Brightness", "HighlightRecovery", "Shadows",
-                "ColorTemperature", "Tint", "Defringe", "LuminanceSmoothing", "ColorNoiseReduction", "SharpenRadius",
-                "SharpenDetail", "SharpenEdgeMasking", "PostCropVignetteAmount", "ConvertToGrayscale", "CameraProfile",
-                "LensProfileName", "LensProfileEnable"
+                "Software",
+                "ModifyDate",
+                "ColorSpace",
+                "ColorMode",
+                "RenderingIntent",
+                "Compression",
+                "ICCProfileName",
+                "ProfileDescription",
+                "ProfileVersion",
+                "CreatorTool",
+                "WriterName",
+                "ReaderName",
+                "PhotoshopQuality",
+                "PhotoshopFormat",
+                "HasRealMergedData",
+                "AlreadyApplied",
+                "HasSettings",
+                "HasCrop",
+                "ToneCurveName",
+                "ToneCurve",
+                "Clarity",
+                "Vibrance",
+                "FillLight",
+                "Brightness",
+                "HighlightRecovery",
+                "Shadows",
+                "ColorTemperature",
+                "Tint",
+                "Defringe",
+                "LuminanceSmoothing",
+                "ColorNoiseReduction",
+                "SharpenRadius",
+                "SharpenDetail",
+                "SharpenEdgeMasking",
+                "PostCropVignetteAmount",
+                "ConvertToGrayscale",
+                "CameraProfile",
+                "LensProfileName",
+                "LensProfileEnable",
             ],
-
             "Date & Time": [
-                "DateTimeOriginal", "CreateDate", "ModifyDate", "DateCreated", "MetadataDate",
-                "SubSecTime", "SubSecTimeOriginal", "SubSecTimeDigitized", "SubSecCreateDate",
-                "SubSecModifyDate", "SubSecDateTimeOriginal", "DateTimeCreated", "TimeCreated"
+                "DateTimeOriginal",
+                "CreateDate",
+                "ModifyDate",
+                "DateCreated",
+                "MetadataDate",
+                "SubSecTime",
+                "SubSecTimeOriginal",
+                "SubSecTimeDigitized",
+                "SubSecCreateDate",
+                "SubSecModifyDate",
+                "SubSecDateTimeOriginal",
+                "DateTimeCreated",
+                "TimeCreated",
             ],
-
             "Author & Rights": [
-                "Artist", "Creator", "By-line", "Copyright", "CopyrightNotice", "Rights", "Credit", "Source"
+                "Artist",
+                "Creator",
+                "By-line",
+                "Copyright",
+                "CopyrightNotice",
+                "Rights",
+                "Credit",
+                "Source",
             ],
-
             "Location": [
-                "GPSLatitude", "GPSLongitude", "GPSAltitude", "GPSDateStamp", "GPSDateTime", "GPSLatitudeRef",
-                "GPSLongitudeRef", "GPSAltitudeRef", "GPSMapDatum", "GPSProcessingMethod"
+                "GPSLatitude",
+                "GPSLongitude",
+                "GPSAltitude",
+                "GPSDateStamp",
+                "GPSDateTime",
+                "GPSLatitudeRef",
+                "GPSLongitudeRef",
+                "GPSAltitudeRef",
+                "GPSMapDatum",
+                "GPSProcessingMethod",
             ],
-
             "Editing History": [
-                "History", "HistoryAction", "HistorySoftwareAgent",
-                "HistoryChanged", "HistoryParameters"
+                "History",
+                "HistoryAction",
+                "HistorySoftwareAgent",
+                "HistoryChanged",
+                "HistoryParameters",
             ],
-
             "XMP & IPTC": [
-                "XMPToolkit", "DocumentID", "InstanceID", "OriginalDocumentID", "DerivedFromInstanceID",
-                "DerivedFromDocumentID", "DerivedFromOriginalDocumentID", "ApplicationRecordVersion",
-                "CodedCharacterSet", "IPTCDigest", "CurrentIPTCDigest"
+                "XMPToolkit",
+                "DocumentID",
+                "InstanceID",
+                "OriginalDocumentID",
+                "DerivedFromInstanceID",
+                "DerivedFromDocumentID",
+                "DerivedFromOriginalDocumentID",
+                "ApplicationRecordVersion",
+                "CodedCharacterSet",
+                "IPTCDigest",
+                "CurrentIPTCDigest",
             ],
-
             "Advanced / Technical": [
-                "ExifToolVersion", "ExifVersion", "ExifByteOrder", "EncodingProcess", "BitsPerSample",
-                "ColorComponents", "YCbCrSubSampling", "Orientation", "SensingMethod", "SceneType",
-                "CustomRendered", "CFAPattern", "FileSource", "DigitalZoomRatio", "SensingMethod",
-                "ProfileClass", "ProfileFileSignature", "ProfileCreator", "ProfileID", "ProfileCMMType",
-                "ProfileConnectionSpace", "ProfileDateTime", "DeviceManufacturer", "DeviceModel",
-                "DeviceAttributes", "ConnectionSpaceIlluminant", "MediaWhitePoint", "MediaBlackPoint"
+                "ExifToolVersion",
+                "ExifVersion",
+                "ExifByteOrder",
+                "EncodingProcess",
+                "BitsPerSample",
+                "ColorComponents",
+                "YCbCrSubSampling",
+                "Orientation",
+                "SensingMethod",
+                "SceneType",
+                "CustomRendered",
+                "CFAPattern",
+                "FileSource",
+                "DigitalZoomRatio",
+                "SensingMethod",
+                "ProfileClass",
+                "ProfileFileSignature",
+                "ProfileCreator",
+                "ProfileID",
+                "ProfileCMMType",
+                "ProfileConnectionSpace",
+                "ProfileDateTime",
+                "DeviceManufacturer",
+                "DeviceModel",
+                "DeviceAttributes",
+                "ConnectionSpaceIlluminant",
+                "MediaWhitePoint",
+                "MediaBlackPoint",
             ],
-
             "Thumbnails": [
-                "ThumbnailImage", "ThumbnailOffset", "ThumbnailLength", "PhotoshopThumbnail"
-            ]
+                "ThumbnailImage",
+                "ThumbnailOffset",
+                "ThumbnailLength",
+                "PhotoshopThumbnail",
+            ],
         }
 
         self.categories = self.categorize_metadata(self.metadata)
@@ -128,7 +245,7 @@ class MetaView(QMainWindow):
             widget = QWidget()
             layout = QVBoxLayout()
             layout.setSpacing(0)
-            layout.setContentsMargins(0,0,0,0)
+            layout.setContentsMargins(0, 0, 0, 0)
 
             # Header
             layoutH = QHBoxLayout()
@@ -211,11 +328,11 @@ class MetaView(QMainWindow):
             return
 
         result = subprocess.run(
-            ["exiftool", "-j", self.file_path],
-            capture_output=True, text=True
+            ["exiftool", "-j", self.file_path], capture_output=True, text=True
         )
         self.metadata = json.loads(result.stdout)
         return self.metadata[0] if self.metadata else {}
+
 
 def main():
     app = QApplication(sys.argv)

@@ -1,17 +1,29 @@
 import sys
+
 import numpy as np
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication
+
 # pyqtgraph, pyopengl
-from pyqtgraph.opengl import GLViewWidget, MeshData, GLMeshItem
+from pyqtgraph.opengl import GLMeshItem, GLViewWidget, MeshData
+
 # numpy-stl
 from stl import mesh
 
+
 class NonInteractiveGLViewWidget(GLViewWidget):
-    def mousePressEvent(self, ev): pass
-    def mouseMoveEvent(self, ev): pass
-    def mouseReleaseEvent(self, ev): pass
-    def wheelEvent(self, ev): pass
+    def mousePressEvent(self, ev):
+        pass
+
+    def mouseMoveEvent(self, ev):
+        pass
+
+    def mouseReleaseEvent(self, ev):
+        pass
+
+    def wheelEvent(self, ev):
+        pass
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -36,7 +48,7 @@ if __name__ == "__main__":
         drawFaces=True,
         drawEdges=False,
         color=(0.8, 0.8, 0.8, 1),
-        shader='shaded'
+        shader="shaded",
     )
     view.addItem(mesh_item)
 
@@ -51,6 +63,6 @@ if __name__ == "__main__":
     timer = QTimer()
     timer.timeout.connect(spin)
     timer.start(30)
-    
+
     view.show()
     app.exec()
