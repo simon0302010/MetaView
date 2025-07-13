@@ -44,7 +44,9 @@ class MetaView(QMainWindow):
         if not file_path:
             return
 
-        self.add_text_row("Property", "Value")
+        print(f"Selected File: {file_path}")
+
+        self.add_text_row("Property", "Value", header=True)
 
         for i in range(5):
             self.add_text_row(str(i), str(i))
@@ -60,7 +62,7 @@ class MetaView(QMainWindow):
         
         self.setCentralWidget(scroll)
 
-    def add_text_row(self, text1="", text2=""):
+    def add_text_row(self, text1="", text2="", header=False):
         row_widget = QWidget()
         row_layout = QVBoxLayout()
         row_layout.setSpacing(0)
@@ -71,6 +73,11 @@ class MetaView(QMainWindow):
         layoutH.setContentsMargins(8, 0, 8, 0)
         label1 = QLabel(text1)
         label2 = QLabel(text2)
+
+        if header:
+            label1.setStyleSheet("font-weight: bold; font-size: 15px;")
+            label2.setStyleSheet("font-weight: bold; font-size: 15px;")
+        
         layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
         layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
         row_layout.addLayout(layoutH)
