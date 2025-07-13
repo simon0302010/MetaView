@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import (
     QLabel,
     QFrame,
     QScrollArea,
-    QFileDialog
+    QFileDialog,
+    QTabWidget
 )
 import subprocess
 import json
@@ -19,11 +20,6 @@ class MetaView(QMainWindow):
         super().__init__()
         self.setWindowTitle("MetaView")
         self.setMinimumSize(QSize(400, 550))
-        
-        self.layoutV = QVBoxLayout()
-        self.layoutV.setSpacing(0)
-        self.layoutV.setContentsMargins(0,0,0,0)
-        self.text_rows = []
         
         label = QLabel("Open a file to get started.")
         label.setAlignment(Qt.AlignCenter)
@@ -48,57 +44,74 @@ class MetaView(QMainWindow):
 
         print(f"Selected File: {self.file_path}")
 
-        self.add_text_row("Property", "Value", header=True)
-
         self.metadata = self.get_metadata()
 
-        for key, value in self.metadata.items():
-            self.add_text_row(str(key), str(value))
+        categories = self.categorize_metadata(self.metadata)
 
-        self.layoutV.addStretch()
+        tab_widget = QTabWidget()
+        for category, items in categories.items():
+            widget = QWidget()
+            layout = QVBoxLayout()
+            layout.setSpacing(0)
+            layout.setContentsMargins(0,0,0,0)
 
-        content_widget = QWidget()
-        content_widget.setLayout(self.layoutV)
-        
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(content_widget)
-        
-        self.setCentralWidget(scroll)
-
-    def add_text_row(self, text1="", text2="", header=False):
-        row_widget = QWidget()
-        row_layout = QVBoxLayout()
-        row_layout.setSpacing(0)
-        row_layout.setContentsMargins(0, 0, 0, 0)
-
-        layoutH = QHBoxLayout()
-        layoutH.setSpacing(10)
-        layoutH.setContentsMargins(8, 0, 8, 0)
-        label1 = QLabel(text1)
-        label2 = QLabel(text2)
-
-        if header:
+            # Header
+            layoutH = QHBoxLayout()
+            label1 = QLabel("Property")
+            label2 = QLabel("Value")
             label1.setStyleSheet("font-weight: bold; font-size: 15px;")
             label2.setStyleSheet("font-weight: bold; font-size: 15px;")
-        
-        layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
-        layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
-        row_layout.addLayout(layoutH)
+            layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
+            layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
+            layout.addLayout(layoutH)
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+            line.setStyleSheet("color: gray; background-color: gray;")
+            line.setFixedHeight(2)
+            layout.addWidget(line)
 
-        # separator line
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setFrameShadow(QFrame.Sunken)
-        line.setStyleSheet("color: gray; background-color: gray;")
-        line.setFixedHeight(2)
-        row_layout.addWidget(line)
+            for key, value in items.items():
+                row_widget = QWidget()
+                row_layout = QVBoxLayout()
+                row_layout.setSpacing(0)
+                row_layout.setContentsMargins(0, 0, 0, 0)
 
-        row_widget.setLayout(row_layout)
-        row_widget.setMinimumHeight(32)
+                layoutH = QHBoxLayout()
+                layoutH.setSpacing(10)
+                layoutH.setContentsMargins(8, 0, 8, 0)
+                label1 = QLabel(str(key))
+                label2 = QLabel(str(value))
+                layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
+                layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
+                row_layout.addLayout(layoutH)
 
-        self.layoutV.addWidget(row_widget)
-        self.text_rows.append((label1, label2))
+                line = QFrame()
+                line.setFrameShape(QFrame.HLine)
+                line.setFrameShadow(QFrame.Sunken)
+                line.setStyleSheet("color: gray; background-color: gray;")
+                line.setFixedHeight(1)
+                row_layout.addWidget(line)
+
+                row_widget.setLayout(row_layout)
+                row_widget.setMinimumHeight(32)
+                layout.addWidget(row_widget)
+
+            layout.addStretch()
+            widget.setLayout(layout)
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setWidget(widget)
+            tab_widget.addTab(scroll, category)
+
+        self.setCentralWidget(tab_widget)
+
+    def categorize_metadata(self, metadata):
+        categories = {}
+        for key, value in metadata.items():
+            cat, subkey = "General", key
+            categories.setdefault(cat, {})[subkey] = value
+        return categories
 
     def get_metadata(self, file_path=None):
         if file_path:
