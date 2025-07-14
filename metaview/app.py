@@ -157,6 +157,7 @@ class MetaView(QMainWindow):
         print("Quitting...")
         sys.exit(0)
 
+
 def main():
     app = QApplication(sys.argv)
     try:
