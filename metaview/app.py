@@ -34,6 +34,9 @@ class MetaView(QMainWindow):
         open_action = file_menu.addAction("Open")
         open_action.triggered.connect(self.open_file)
 
+        quit_actoin = file_menu.addAction("Quit")
+        quit_actoin.triggered.connect(self.quit)
+
         self.setCentralWidget(label)
 
         if file_path:
@@ -150,6 +153,9 @@ class MetaView(QMainWindow):
         self.metadata = json.loads(result.stdout)
         return self.metadata[0] if self.metadata else {}
 
+    def quit(self):
+        print("Quitting...")
+        sys.exit(0)
 
 def main():
     app = QApplication(sys.argv)
