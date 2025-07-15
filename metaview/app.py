@@ -123,14 +123,15 @@ class MetaView(QMainWindow):
         uncategorized = {}
 
         for key, value in metadata.items():
+            display_key = extra_data.rename_dict.get(key, key)
             found = False
             for cat, keys in self.categories_dict.items():
                 if key in keys:
-                    categories[cat][key] = value
+                    categories[cat][display_key] = value
                     found = True
                     break
             if not found:
-                uncategorized[key] = value
+                uncategorized[display_key] = value
 
         if uncategorized:
             categories["Other"] = uncategorized
