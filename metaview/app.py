@@ -12,17 +12,24 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMessageBox,
     QScrollArea,
     QSizePolicy,
     QTabWidget,
     QVBoxLayout,
     QWidget,
-    QMessageBox
 )
 
 from . import extra_data, location
 
-READ_ONLY_KEYS = {"Source File", "File Name", "Directory", "File Size", "File Permissions"}
+READ_ONLY_KEYS = {
+    "Source File",
+    "File Name",
+    "Directory",
+    "File Size",
+    "File Permissions",
+}
+
 
 class ClickableLabel(QLabel):
     clicked = pyqtSignal()
@@ -31,7 +38,8 @@ class ClickableLabel(QLabel):
         self.clicked.emit()
         super().mouseDoubleClickEvent(event)
 
-class MetaView(QMainWindow):    
+
+class MetaView(QMainWindow):
     def __init__(self, file_path=None):
         super().__init__()
         self.setWindowTitle("MetaView")
@@ -56,7 +64,7 @@ class MetaView(QMainWindow):
         if file_path:
             self.open_file(file_path)
 
-    def open_file(self, file_path=None):        
+    def open_file(self, file_path=None):
         if file_path:
             self.file_path = file_path
         else:
@@ -135,6 +143,7 @@ class MetaView(QMainWindow):
             def make_label(text, layoutH, key):
                 label = ClickableLabel(text)
                 label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
                 def on_label_clicked():
                     if key in READ_ONLY_KEYS:
                         # do nothing if read-only
@@ -148,21 +157,28 @@ class MetaView(QMainWindow):
                         fm = QFontMetrics(line_edit.font())
                         text_width = fm.horizontalAdvance(line_edit.text() or " ")
                         line_edit.setMinimumWidth(text_width + 20)
+
                     line_edit.textChanged.connect(adjust_width)
                     adjust_width()
 
                     idx = layoutH.indexOf(label)
                     layoutH.removeWidget(label)
                     label.deleteLater()
-                    layoutH.insertWidget(idx, line_edit, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter)
+                    layoutH.insertWidget(
+                        idx, line_edit, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter
+                    )
 
                     def finish_edit():
                         new_label = make_label(line_edit.text(), layoutH, key)
                         layoutH.removeWidget(line_edit)
                         line_edit.deleteLater()
-                        layoutH.insertWidget(idx, new_label, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter)
+                        layoutH.insertWidget(
+                            idx, new_label, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter
+                        )
+
                     line_edit.editingFinished.connect(finish_edit)
                     line_edit.setFocus()
+
                 label.clicked.connect(on_label_clicked)
                 return label
 
@@ -186,8 +202,10 @@ class MetaView(QMainWindow):
                     )
                 else:
                     label2 = make_label(str(value), layoutH, key)
-                    layoutH.addWidget(label2, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter)
-                
+                    layoutH.addWidget(
+                        label2, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter
+                    )
+
                 row_layout.addLayout(layoutH)
 
                 line = QFrame()
@@ -270,7 +288,7 @@ class MetaView(QMainWindow):
             print(
                 f"Unable to update property '{property}' from category '{category}': Property does not exist."
             )
-            
+
     def display_error(self, text):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
