@@ -2,26 +2,36 @@ import json
 import subprocess
 import sys
 
-from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtCore import QSize, Qt, pyqtSignal
+from PyQt5.QtGui import QFontMetrics, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QMainWindow,
     QScrollArea,
+    QSizePolicy,
     QTabWidget,
     QVBoxLayout,
     QWidget,
+    QMessageBox
 )
-from PyQt5.QtGui import QPixmap
 
-from . import extra_data
-from . import location
+from . import extra_data, location
 
+READ_ONLY_KEYS = {"Source File", "File Name", "Directory", "File Size", "File Permissions"}
 
-class MetaView(QMainWindow):
+class ClickableLabel(QLabel):
+    clicked = pyqtSignal()
+
+    def mouseDoubleClickEvent(self, event):
+        self.clicked.emit()
+        super().mouseDoubleClickEvent(event)
+
+class MetaView(QMainWindow):    
     def __init__(self, file_path=None):
         super().__init__()
         self.setWindowTitle("MetaView")
@@ -34,9 +44,11 @@ class MetaView(QMainWindow):
         file_menu = menu.addMenu("&File")
 
         open_action = file_menu.addAction("Open")
+        open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self.open_file)
 
         quit_actoin = file_menu.addAction("Quit")
+        quit_actoin.setShortcut("Ctrl+Q")
         quit_actoin.triggered.connect(self.quit)
 
         self.setCentralWidget(label)
@@ -44,7 +56,7 @@ class MetaView(QMainWindow):
         if file_path:
             self.open_file(file_path)
 
-    def open_file(self, file_path=None):
+    def open_file(self, file_path=None):        
         if file_path:
             self.file_path = file_path
         else:
@@ -65,7 +77,7 @@ class MetaView(QMainWindow):
         self.categories_dict = extra_data.categories_dict
 
         self.categories = self.categorize_metadata(self.metadata)
-        
+
         # add preview image
         image_label = QLabel()
         pixmap = QPixmap(self.file_path)
@@ -82,18 +94,18 @@ class MetaView(QMainWindow):
             image_label.setMaximumWidth(max_height)  # fallback if pixmap is invalid
 
         self.add_property("General", "Image Preview", image_label)
-        
+
         # add location as text
         if "GPSLatitude" in self.metadata and "GPSLongitude" in self.metadata:
             GPSLatitude = self.metadata["GPSLatitude"]
             GPSLongitude = self.metadata["GPSLongitude"]
             GPSLatitude = location.convert_dms(GPSLatitude)
             GPSLongitude = location.convert_dms(GPSLongitude)
-            
+
             city, region, country = location.get_location(GPSLatitude, GPSLongitude)
-            
+
             location_str = f"{city}, {region}, {country}"
-            
+
             self.add_property("Location", "Location", location_str)
 
         tab_widget = QTabWidget()
@@ -120,6 +132,40 @@ class MetaView(QMainWindow):
             line.setFixedHeight(2)
             layout.addWidget(line)
 
+            def make_label(text, layoutH, key):
+                label = ClickableLabel(text)
+                label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                def on_label_clicked():
+                    if key in READ_ONLY_KEYS:
+                        # do nothing if read-only
+                        self.display_error("You can't edit this.")
+                        return
+                    line_edit = QLineEdit(label.text())
+                    line_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+                    # adaptive width
+                    def adjust_width():
+                        fm = QFontMetrics(line_edit.font())
+                        text_width = fm.horizontalAdvance(line_edit.text() or " ")
+                        line_edit.setMinimumWidth(text_width + 20)
+                    line_edit.textChanged.connect(adjust_width)
+                    adjust_width()
+
+                    idx = layoutH.indexOf(label)
+                    layoutH.removeWidget(label)
+                    label.deleteLater()
+                    layoutH.insertWidget(idx, line_edit, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter)
+
+                    def finish_edit():
+                        new_label = make_label(line_edit.text(), layoutH, key)
+                        layoutH.removeWidget(line_edit)
+                        line_edit.deleteLater()
+                        layoutH.insertWidget(idx, new_label, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter)
+                    line_edit.editingFinished.connect(finish_edit)
+                    line_edit.setFocus()
+                label.clicked.connect(on_label_clicked)
+                return label
+
             for key, value in items.items():
                 row_widget = QWidget()
                 row_layout = QVBoxLayout()
@@ -134,10 +180,14 @@ class MetaView(QMainWindow):
                 layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
 
                 if isinstance(value, QWidget):
-                    layoutH.addWidget(value, alignment=Qt.AlignVCenter | Qt.AlignLeft)
+                    value.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                    layoutH.addWidget(
+                        value, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter
+                    )
                 else:
-                    label2 = QLabel(str(value))
-                    layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
+                    label2 = make_label(str(value), layoutH, key)
+                    layoutH.addWidget(label2, 1, alignment=Qt.AlignLeft | Qt.AlignVCenter)
+                
                 row_layout.addLayout(layoutH)
 
                 line = QFrame()
@@ -200,17 +250,35 @@ class MetaView(QMainWindow):
         self.categories.setdefault(str(category), {})[str(property)] = value
 
     def remove_property(self, category, property):
-        if str(category) in self.categories and str(property) in self.categories[str(category)]:
+        if (
+            str(category) in self.categories
+            and str(property) in self.categories[str(category)]
+        ):
             del self.categories[str(category)][str(property)]
         else:
-            print(f"Unable to delete property '{property}' from category '{category}': Property does not exist.")
-    
+            print(
+                f"Unable to delete property '{property}' from category '{category}': Property does not exist."
+            )
+
     def update_property(self, category, property, value):
-        if str(category) in self.categories and str(property) in self.categories[str(category)]:
+        if (
+            str(category) in self.categories
+            and str(property) in self.categories[str(category)]
+        ):
             self.categories[str(category)][str(property)] = value
         else:
-            print(f"Unable to update property '{property}' from category '{category}': Property does not exist.")
-    
+            print(
+                f"Unable to update property '{property}' from category '{category}': Property does not exist."
+            )
+            
+    def display_error(self, text):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("Error")
+        msg.setInformativeText(text)
+        msg.setWindowTitle("Error")
+        msg.exec_()
+
     def quit(self):
         print("Quitting...")
         sys.exit(0)

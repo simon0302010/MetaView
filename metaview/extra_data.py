@@ -54,7 +54,6 @@ categories_dict = {
     ],
     "Image Processing": [
         "Software",
-        "ModifyDate",
         "ColorSpace",
         "ColorMode",
         "RenderingIntent",
@@ -240,7 +239,6 @@ rename_dict = {
     "SubjectDistanceRange": "Subject Distance Range",
     # Image Processing
     "Software": "Software",
-    "ModifyDate": "Modify Date",
     "ColorSpace": "Color Space",
     "ColorMode": "Color Mode",
     "RenderingIntent": "Rendering Intent",

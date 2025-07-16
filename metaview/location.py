@@ -1,5 +1,7 @@
-import reverse_geocoder as rg
 import re
+
+import reverse_geocoder as rg
+
 
 def convert_dms(dms):
     # Regex to extract degrees, minutes, seconds, and direction
@@ -17,16 +19,20 @@ def convert_dms(dms):
         decimal = -decimal
     return decimal
 
+
 def get_location(lat, lon):
     results = rg.search((lat, lon))
     if results:
         info = results[0]
-        return info['name'], info['admin1'], info['cc']
+        return info["name"], info["admin1"], info["cc"]
     return None, None, None
+
 
 if __name__ == "__main__":
     latitude = "43 deg 28' 5.68\" N"
     longitude = "11 deg 52' 48.62\" E"
 
-    city, region, country_code = get_location(convert_dms(latitude), convert_dms(longitude))
+    city, region, country_code = get_location(
+        convert_dms(latitude), convert_dms(longitude)
+    )
     print(f"City: {city}, Region: {region}, Country: {country_code}")
