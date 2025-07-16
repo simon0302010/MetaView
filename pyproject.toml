@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MetaView"
-version = "0.1.3"
+version = "0.1.4"
 description = "Viewer and Editor for Image Metadata"
 readme = "README.md"
 requires-python = ">=3.8,<=3.14"

@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QVBoxLayout,
     QWidget,
+    QLineEdit
 )
 
 from . import extra_data
@@ -69,10 +70,11 @@ class MetaView(QMainWindow):
 
             # Header
             layoutH = QHBoxLayout()
-            label1 = QLabel("Property")
-            label2 = QLabel("Value")
+            label1 = QLabel(" Property")
+            label2 = QLabel("    Value")
             label1.setStyleSheet("font-weight: bold; font-size: 15px;")
             label2.setStyleSheet("font-weight: bold; font-size: 15px;")
+            label1.setFixedWidth(120)
             layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
             layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
             layout.addLayout(layoutH)
@@ -93,9 +95,14 @@ class MetaView(QMainWindow):
                 layoutH.setSpacing(10)
                 layoutH.setContentsMargins(8, 0, 8, 0)
                 label1 = QLabel(str(key))
-                label2 = QLabel(str(value))
+                label1.setFixedWidth(120)
                 layoutH.addWidget(label1, alignment=Qt.AlignVCenter)
-                layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
+
+                if isinstance(value, QWidget):
+                    layoutH.addWidget(value, alignment=Qt.AlignVCenter)
+                else:
+                    label2 = QLabel(str(value))
+                    layoutH.addWidget(label2, alignment=Qt.AlignVCenter)
                 row_layout.addLayout(layoutH)
 
                 line = QFrame()
@@ -155,7 +162,7 @@ class MetaView(QMainWindow):
         return self.metadata[0] if self.metadata else {}
 
     def add_property(self, category, property, value):
-        self.categories.setdefault(str(category), {})[str(property)] = str(value)
+        self.categories.setdefault(str(category), {})[str(property)] = value
 
     def remove_property(self, category, property):
         if str(category) in self.categories and str(property) in self.categories[str(category)]:
