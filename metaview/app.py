@@ -14,8 +14,8 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QVBoxLayout,
     QWidget,
-    QLineEdit
 )
+from PyQt5.QtGui import QPixmap
 
 from . import extra_data
 
@@ -60,6 +60,23 @@ class MetaView(QMainWindow):
         self.categories_dict = extra_data.categories_dict
 
         self.categories = self.categorize_metadata(self.metadata)
+        
+        # add preview image
+        image_label = QLabel()
+        pixmap = QPixmap(self.file_path)
+        image_label.setPixmap(pixmap)
+        image_label.setScaledContents(True)
+        max_height = 128
+        image_label.setMaximumHeight(max_height)
+
+        if not pixmap.isNull():
+            aspect_ratio = pixmap.width() / pixmap.height()
+            width = int(max_height * aspect_ratio)
+            image_label.setMaximumWidth(width)
+        else:
+            image_label.setMaximumWidth(max_height)  # fallback if pixmap is invalid
+
+        self.add_property("General", "Image Preview", image_label)
 
         tab_widget = QTabWidget()
         for category, items in self.categories.items():
