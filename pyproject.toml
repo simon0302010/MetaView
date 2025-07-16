@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pyopengl", "numpy-stl", "pyqtgraph", "geopy", "reverse_geocoder"]
+test = ["pyopengl", "numpy-stl", "pyqtgraph", "reverse_geocoder"]
 
 [project.urls]
 Homepage = "https://github.com/simon0302010/MetaView"
