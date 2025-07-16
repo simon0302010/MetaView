@@ -10,6 +10,7 @@ categories_dict = {
         "FilePermissions",
         "FileModifyDate",
         "FileAccessDate",
+        "Subject",
     ],
     "Camera": [
         "Make",
@@ -41,7 +42,7 @@ categories_dict = {
         "MeteringMode",
         "Flash",
         "WhiteBalance",
-        "BrightnessValue"
+        "BrightnessValue",
         "SceneCaptureType",
         "Contrast",
         "Saturation",
@@ -98,6 +99,7 @@ categories_dict = {
         "DateCreated",
         "MetadataDate",
         "SubSecTime",
+        "OffsetTime",
         "SubSecTimeOriginal",
         "SubSecTimeDigitized",
         "SubSecCreateDate",
@@ -115,11 +117,13 @@ categories_dict = {
         "Rights",
         "Credit",
         "Source",
+        "CreatorCity",
+        "CreatorRegion",
     ],
     "Location": [
         "GPSLatitude",
         "GPSLongitude",
-        "GPSImgDirecion",
+        "GPSImgDirection",
         "GPSAltitude",
         "GPSDateStamp",
         "GPSDateTime",
@@ -129,7 +133,7 @@ categories_dict = {
         "GPSMapDatum",
         "GPSProcessingMethod",
         "GPSSpeedRef",
-        "GPSSpeed"
+        "GPSSpeed",
     ],
     "Editing History": [
         "History",
@@ -201,7 +205,6 @@ rename_dict = {
     "FilePermissions": "File Permissions",
     "FileModifyDate": "File Modify Date",
     "FileAccessDate": "File Access Date",
-
     # Camera
     "Make": "Manufacturer",
     "Model": "Camera Model",
@@ -220,7 +223,6 @@ rename_dict = {
     "DOF": "Depth of Field",
     "FOV": "Field of View",
     "HyperfocalDistance": "Hyperfocal Distance",
-
     # Exposure
     "ExposureTime": "Exposure Time",
     "ExposureCompensation": "Exposure Compensation",
@@ -240,7 +242,6 @@ rename_dict = {
     "GainControl": "Gain Control",
     "SubjectDistance": "Subject Distance",
     "SubjectDistanceRange": "Subject Distance Range",
-
     # Image Processing
     "Software": "Software",
     "ModifyDate": "Modify Date",
@@ -281,7 +282,6 @@ rename_dict = {
     "CameraProfile": "Camera Profile",
     "LensProfileName": "Lens Profile Name",
     "LensProfileEnable": "Lens Profile Enable",
-
     # Date & Time
     "DateTimeOriginal": "Date/Time Original",
     "CreateDate": "Create Date",
@@ -289,6 +289,7 @@ rename_dict = {
     "DateCreated": "Date Created",
     "MetadataDate": "Metadata Date",
     "SubSecTime": "Subsecond Time",
+    "OffsetTime": "Time Zone Offset",
     "SubSecTimeOriginal": "Subsecond Time Original",
     "SubSecTimeDigitized": "Subsecond Time Digitized",
     "SubSecCreateDate": "Subsecond Create Date",
@@ -296,7 +297,6 @@ rename_dict = {
     "SubSecDateTimeOriginal": "Subsecond Date/Time Original",
     "DateTimeCreated": "Date/Time Created",
     "TimeCreated": "Time Created",
-
     # Author & Rights
     "Artist": "Artist",
     "Creator": "Creator",
@@ -306,7 +306,8 @@ rename_dict = {
     "Rights": "Rights",
     "Credit": "Credit",
     "Source": "Source",
-
+    "CreatorCity": "Creator City",
+    "CreatorRegion": "Creator Region",
     # Location
     "GPSLatitude": "GPS Latitude",
     "GPSLongitude": "GPS Longitude",
@@ -321,14 +322,12 @@ rename_dict = {
     "GPSImgDirection": "GPS Direction",
     "GPSSpeedRef": "GPS Speed Unit",
     "GPSSpeed": "GPS Speed",
-
     # Editing History
     "History": "History",
     "HistoryAction": "History Action",
     "HistorySoftwareAgent": "History Software Agent",
     "HistoryChanged": "History Changed",
     "HistoryParameters": "History Parameters",
-
     # XMP & IPTC
     "XMPToolkit": "XMP Toolkit",
     "DocumentID": "Document ID",
@@ -341,7 +340,6 @@ rename_dict = {
     "CodedCharacterSet": "Coded Character Set",
     "IPTCDigest": "IPTC Digest",
     "CurrentIPTCDigest": "Current IPTC Digest",
-
     # Advanced / Technical
     "ExifToolVersion": "ExifTool Version",
     "ExifVersion": "Exif Version",
@@ -370,7 +368,6 @@ rename_dict = {
     "ConnectionSpaceIlluminant": "Connection Space Illuminant",
     "MediaWhitePoint": "Media White Point",
     "MediaBlackPoint": "Media Black Point",
-
     # Thumbnails
     "ThumbnailImage": "Thumbnail Image",
     "ThumbnailOffset": "Thumbnail Offset",
