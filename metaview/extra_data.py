@@ -15,6 +15,7 @@ categories_dict = {
         "Make",
         "Model",
         "SerialNumber",
+        "LensMake",
         "LensID",
         "ShutterSpeed",
         "Aperture",
@@ -40,6 +41,7 @@ categories_dict = {
         "MeteringMode",
         "Flash",
         "WhiteBalance",
+        "BrightnessValue"
         "SceneCaptureType",
         "Contrast",
         "Saturation",
@@ -117,6 +119,7 @@ categories_dict = {
     "Location": [
         "GPSLatitude",
         "GPSLongitude",
+        "GPSImgDirecion",
         "GPSAltitude",
         "GPSDateStamp",
         "GPSDateTime",
@@ -125,6 +128,8 @@ categories_dict = {
         "GPSAltitudeRef",
         "GPSMapDatum",
         "GPSProcessingMethod",
+        "GPSSpeedRef",
+        "GPSSpeed"
     ],
     "Editing History": [
         "History",
@@ -202,6 +207,7 @@ rename_dict = {
     "Model": "Camera Model",
     "SerialNumber": "Serial Number",
     "LensID": "Lens ID",
+    "LensMake": "Lens Manufacturer",
     "ShutterSpeed": "Shutter Speed",
     "Aperture": "Aperture",
     "ApertureValue": "Aperture Value",
@@ -221,6 +227,7 @@ rename_dict = {
     "ExposureMode": "Exposure Mode",
     "ExposureProgram": "Exposure Program",
     "ISO": "ISO",
+    "BrightnessValue": "Brightness",
     "SensitivityType": "Sensitivity Type",
     "LightValue": "Light Value",
     "MeteringMode": "Metering Mode",
@@ -311,6 +318,9 @@ rename_dict = {
     "GPSAltitudeRef": "GPS Altitude Ref",
     "GPSMapDatum": "GPS Map Datum",
     "GPSProcessingMethod": "GPS Processing Method",
+    "GPSImgDirection": "GPS Direction",
+    "GPSSpeedRef": "GPS Speed Unit",
+    "GPSSpeed": "GPS Speed",
 
     # Editing History
     "History": "History",
