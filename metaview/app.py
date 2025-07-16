@@ -1,5 +1,3 @@
-import json
-import subprocess
 import sys
 
 from PyQt5.QtCore import QSize, Qt, pyqtSignal
@@ -20,7 +18,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from . import extra_data, location
+from . import extra_data, location, exiftool
 
 READ_ONLY_KEYS = {
     "Source File",
@@ -28,6 +26,10 @@ READ_ONLY_KEYS = {
     "Directory",
     "File Size",
     "File Permissions",
+    "Location",
+    "Image Size",
+    "File Type",
+    "Megapixels"
 }
 
 
@@ -76,7 +78,7 @@ class MetaView(QMainWindow):
 
         print(f"Selected File: {self.file_path}")
 
-        self.metadata = self.get_metadata()
+        self.metadata = exiftool.get_metadata(self.file_path)
 
         # format values better
         self.metadata["GPSImgDirection"] = round(self.metadata["GPSImgDirection"], 2)
@@ -248,21 +250,6 @@ class MetaView(QMainWindow):
 
         categories = {cat: items for cat, items in categories.items() if items}
         return categories
-
-    def get_metadata(self, file_path=None):
-        if file_path:
-            pass
-        elif hasattr(self, "file_path"):
-            file_path = self.file_path
-        else:
-            print("Please load a file first.")
-            return
-
-        result = subprocess.run(
-            ["exiftool", "-j", self.file_path], capture_output=True, text=True
-        )
-        self.metadata = json.loads(result.stdout)
-        return self.metadata[0] if self.metadata else {}
 
     def add_property(self, category, property, value):
         self.categories.setdefault(str(category), {})[str(property)] = value

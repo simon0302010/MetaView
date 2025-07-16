@@ -199,6 +199,9 @@ rename_dict = {
     "FilePermissions": "File Permissions",
     "FileModifyDate": "File Modify Date",
     "FileAccessDate": "File Access Date",
+    "Directory": "Directory",
+    "Megapixels": "Megapixels",
+    "Subject": "Subject",
     # Camera
     "Make": "Manufacturer",
     "Model": "Camera Model",
