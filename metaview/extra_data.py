@@ -30,6 +30,7 @@ categories_dict = {
         "DOF",
         "FOV",
         "HyperfocalDistance",
+        "ShootingMode",
     ],
     "Exposure": [
         "ExposureTime",
@@ -223,6 +224,7 @@ rename_dict = {
     "DOF": "Depth of Field",
     "FOV": "Field of View",
     "HyperfocalDistance": "Hyperfocal Distance",
+    "ShootingMode": "Shooting Mode",
     # Exposure
     "ExposureTime": "Exposure Time",
     "ExposureCompensation": "Exposure Compensation",
