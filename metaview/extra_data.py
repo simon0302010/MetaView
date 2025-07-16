@@ -93,7 +93,7 @@ categories_dict = {
         "LensProfileName",
         "LensProfileEnable",
     ],
-    "Date & Time": [
+    "Date && Time": [
         "DateTimeOriginal",
         "CreateDate",
         "ModifyDate",
@@ -185,12 +185,6 @@ categories_dict = {
         "ConnectionSpaceIlluminant",
         "MediaWhitePoint",
         "MediaBlackPoint",
-    ],
-    "Thumbnails": [
-        "ThumbnailImage",
-        "ThumbnailOffset",
-        "ThumbnailLength",
-        "PhotoshopThumbnail",
     ],
 }
 
@@ -370,9 +364,4 @@ rename_dict = {
     "ConnectionSpaceIlluminant": "Connection Space Illuminant",
     "MediaWhitePoint": "Media White Point",
     "MediaBlackPoint": "Media Black Point",
-    # Thumbnails
-    "ThumbnailImage": "Thumbnail Image",
-    "ThumbnailOffset": "Thumbnail Offset",
-    "ThumbnailLength": "Thumbnail Length",
-    "PhotoshopThumbnail": "Photoshop Thumbnail",
 }

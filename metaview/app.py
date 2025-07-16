@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QPixmap
 
 from . import extra_data
+from . import location
 
 
 class MetaView(QMainWindow):
@@ -57,6 +58,10 @@ class MetaView(QMainWindow):
 
         self.metadata = self.get_metadata()
 
+        # format values better
+        self.metadata["GPSImgDirection"] = round(self.metadata["GPSImgDirection"], 2)
+        del self.metadata["ThumbnailImage"]
+
         self.categories_dict = extra_data.categories_dict
 
         self.categories = self.categorize_metadata(self.metadata)
@@ -77,6 +82,19 @@ class MetaView(QMainWindow):
             image_label.setMaximumWidth(max_height)  # fallback if pixmap is invalid
 
         self.add_property("General", "Image Preview", image_label)
+        
+        # add location as text
+        if "GPSLatitude" in self.metadata and "GPSLongitude" in self.metadata:
+            GPSLatitude = self.metadata["GPSLatitude"]
+            GPSLongitude = self.metadata["GPSLongitude"]
+            GPSLatitude = location.convert_dms(GPSLatitude)
+            GPSLongitude = location.convert_dms(GPSLongitude)
+            
+            city, region, country = location.get_location(GPSLatitude, GPSLongitude)
+            
+            location_str = f"{city}, {region}, {country}"
+            
+            self.add_property("Location", "Location", location_str)
 
         tab_widget = QTabWidget()
         for category, items in self.categories.items():

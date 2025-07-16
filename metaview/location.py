@@ -24,8 +24,9 @@ def get_location(lat, lon):
         return info['name'], info['admin1'], info['cc']
     return None, None, None
 
-latitude = "43 deg 28' 5.68\" N"
-longitude = "11 deg 52' 48.62\" E"
+if __name__ == "__main__":
+    latitude = "43 deg 28' 5.68\" N"
+    longitude = "11 deg 52' 48.62\" E"
 
-city, region, country_code = get_location(convert_dms(latitude), convert_dms(longitude))
-print(f"City: {city}, Region: {region}, Country: {country_code}")
+    city, region, country_code = get_location(convert_dms(latitude), convert_dms(longitude))
+    print(f"City: {city}, Region: {region}, Country: {country_code}")
