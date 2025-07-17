@@ -81,8 +81,10 @@ class MetaView(QMainWindow):
         self.metadata = exiftool.get_metadata(self.file_path)
 
         # format values better
-        self.metadata["GPSImgDirection"] = round(self.metadata["GPSImgDirection"], 2)
-        del self.metadata["ThumbnailImage"]
+        if "GPSImgDirection" in self.metadata:
+            self.metadata["GPSImgDirection"] = round(self.metadata["GPSImgDirection"], 2)
+        if "ThumbnailImage" in self.metadata:
+            del self.metadata["ThumbnailImage"]
 
         self.categories_dict = extra_data.categories_dict
 

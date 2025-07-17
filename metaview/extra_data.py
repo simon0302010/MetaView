@@ -108,7 +108,7 @@ categories_dict = {
         "DateTimeCreated",
         "TimeCreated",
     ],
-    "Author & Rights": [
+    "Author && Rights": [
         "Artist",
         "Creator",
         "By-line",
@@ -142,7 +142,7 @@ categories_dict = {
         "HistoryChanged",
         "HistoryParameters",
     ],
-    "XMP & IPTC": [
+    "XMP && IPTC": [
         "XMPToolkit",
         "DocumentID",
         "InstanceID",
