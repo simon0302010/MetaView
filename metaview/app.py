@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 
@@ -87,6 +88,10 @@ class MetaView(QMainWindow):
         save_action = file_menu.addAction("Save")
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self.save_metadata)
+        
+        save_to_action = file_menu.addAction("Save to")
+        save_to_action.setShortcut("Ctrl+Shift+S")
+        save_to_action.triggered.connect(self.save_to)
 
         self.setCentralWidget(label)
 
@@ -100,7 +105,10 @@ class MetaView(QMainWindow):
             self.file_path, _ = QFileDialog.getOpenFileName(
                 self, "Open File", "", "Images (*.jpg *.jpeg *.png)"
             )
-        if not self.file_path:
+        if (
+            not self.file_path
+            or not os.path.exists(self.file_path)
+        ):
             return
 
         logging.info(f"Selected File: {self.file_path}")
@@ -345,12 +353,27 @@ class MetaView(QMainWindow):
         msg.setWindowTitle("Error")
         msg.exec_()
 
-    def pre_save(self):
+    def save_to(self):
+        filter = "Images (*.jpg *.jpeg *.png)"
+        dialog = QFileDialog(self, "Save to")
+        dialog.setFileMode(QFileDialog.ExistingFiles)
+        dialog.setNameFilter(filter)
+        if dialog.exec_():
+            file_paths = dialog.selectedFiles()
+            for single_path in file_paths:
+                if os.path.exists(single_path):
+                    self.save_metadata(everything=True, save_path=single_path)
+                    logging.info(f"Saved metadata to {single_path}")
+                    if os.path.exists(f"{single_path}_original"):
+                        logging.debug("Deleting backup of modified photo.")
+                        os.remove(f"{single_path}_original")
+                
+    def pre_save(self, everything=False):
         new_data = {}
         for cat, items in self.categories.items():
             for display_key, value in items.items():
                 # only update strings
-                if isinstance(value, str):
+                if isinstance(value, (str, int, float)):
                     backend_key = self.display_to_backend.get(cat, {}).get(display_key)
                     # skip keys that were added afterwards and check if value changed
                     if (
@@ -361,12 +384,25 @@ class MetaView(QMainWindow):
                     ):
                         new_data[backend_key] = value
                         logging.debug(f"{display_key}: {self.original_values.get(backend_key)} -> {value}")
+                    
+                    elif (
+                        backend_key
+                        and backend_key in self.original_backend_keys
+                        and backend_key not in READ_ONLY_KEYS
+                        and backend_key not in ["FileName", "Orientation"]
+                        and everything
+                    ):
+                        new_data[backend_key] = value
+                        logging.debug(f"{display_key}: {self.original_values.get(backend_key)} -> {value}")
         return new_data
 
-    def save_metadata(self):
+    def save_metadata(self, everything=False, save_path=None):
         logging.info("Saving new metadata...")
-        new_data = self.pre_save()
-        result = exiftool.write_metadata(self.file_path, new_data)
+        new_data = self.pre_save(everything=everything)
+        if save_path:
+            result = exiftool.write_metadata(save_path, new_data)
+        else:
+            result = exiftool.write_metadata(self.file_path, new_data)
         logging.info(result)
 
     def quit(self):
