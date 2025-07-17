@@ -92,6 +92,10 @@ class MetaView(QMainWindow):
         save_to_action = file_menu.addAction("Save to")
         save_to_action.setShortcut("Ctrl+Shift+S")
         save_to_action.triggered.connect(self.save_to)
+        
+        delete_metadata_action = file_menu.addAction("Delete Metadata")
+        delete_metadata_action.setShortcut("Ctrl+Del")
+        delete_metadata_action.triggered.connect(self.delete_metadata)
 
         self.setCentralWidget(label)
 
@@ -353,7 +357,7 @@ class MetaView(QMainWindow):
         msg.setWindowTitle("Error")
         msg.exec_()
 
-    def save_to(self):
+    def save_to(self, backup=False):
         filter = "Images (*.jpg *.jpeg *.png)"
         dialog = QFileDialog(self, "Save to")
         dialog.setFileMode(QFileDialog.ExistingFiles)
@@ -364,7 +368,7 @@ class MetaView(QMainWindow):
                 if os.path.exists(single_path):
                     self.save_metadata(everything=True, save_path=single_path)
                     logging.info(f"Saved metadata to {single_path}")
-                    if os.path.exists(f"{single_path}_original"):
+                    if os.path.exists(f"{single_path}_original") and not backup:
                         logging.debug("Deleting backup of modified photo.")
                         os.remove(f"{single_path}_original")
                 
@@ -379,6 +383,7 @@ class MetaView(QMainWindow):
                     if (
                         backend_key
                         and backend_key in self.original_backend_keys
+                        and display_key not in READ_ONLY_KEYS
                         and backend_key not in READ_ONLY_KEYS
                         and self.original_values.get(backend_key) != value  # only changed values
                     ):
@@ -389,7 +394,8 @@ class MetaView(QMainWindow):
                         backend_key
                         and backend_key in self.original_backend_keys
                         and backend_key not in READ_ONLY_KEYS
-                        and backend_key not in ["FileName", "Orientation"]
+                        and display_key not in READ_ONLY_KEYS
+                        and not backend_key == "Orientation"
                         and everything
                     ):
                         new_data[backend_key] = value
@@ -404,6 +410,22 @@ class MetaView(QMainWindow):
         else:
             result = exiftool.write_metadata(self.file_path, new_data)
         logging.info(result)
+        
+    def delete_metadata(self, backup=False):
+        reply = QMessageBox.question(
+            self,
+            "Confirm Delete",
+            "Do you really want to delete all metadata from the image?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            exiftool.delete_metadata(self.file_path)
+            print(f"Deleted all metadata from {self.file_path}")
+            if os.path.exists(f"{self.file_path}_original") and not backup:
+                logging.debug("Deleting backup of modified photo.")
+                os.remove(f"{self.file_path}_original")
+            self.open_file(self.file_path)
 
     def quit(self):
         logging.info("Quitting...")
