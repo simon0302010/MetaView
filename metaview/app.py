@@ -57,9 +57,13 @@ class MetaView(QMainWindow):
         open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self.open_file)
 
-        quit_actoin = file_menu.addAction("Quit")
-        quit_actoin.setShortcut("Ctrl+Q")
-        quit_actoin.triggered.connect(self.quit)
+        quit_action = file_menu.addAction("Quit")
+        quit_action.setShortcut("Ctrl+Q")
+        quit_action.triggered.connect(self.quit)
+
+        save_action = file_menu.addAction("Save")
+        save_action.setShortcut("Ctrl+S")
+        save_action.triggered.connect(self.save_metadata)
 
         self.setCentralWidget(label)
 
@@ -79,6 +83,8 @@ class MetaView(QMainWindow):
         print(f"Selected File: {self.file_path}")
 
         self.metadata = exiftool.get_metadata(self.file_path)
+        self.original_backend_keys = set(self.metadata.keys())
+        self.original_values = {}
 
         # format values better
         if "GPSImgDirection" in self.metadata:
@@ -89,6 +95,13 @@ class MetaView(QMainWindow):
         self.categories_dict = extra_data.categories_dict
 
         self.categories = self.categorize_metadata(self.metadata)
+
+        for cat, items in self.categories.items():
+            for display_key, value in items.items():
+                if isinstance(value, str):
+                    backend_key = self.display_to_backend.get(cat, {}).get(display_key)
+                    if backend_key:
+                        self.original_values[backend_key] = value
 
         # add preview image
         image_label = QLabel()
@@ -144,13 +157,12 @@ class MetaView(QMainWindow):
             line.setFixedHeight(2)
             layout.addWidget(line)
 
-            def make_label(text, layoutH, key):
+            def make_label(text, layoutH, key, cat=category):  # Capture category
                 label = ClickableLabel(text)
                 label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
                 def on_label_clicked():
                     if key in READ_ONLY_KEYS:
-                        # do nothing if read-only
                         self.display_error("You can't edit this.")
                         return
                     line_edit = QLineEdit(label.text())
@@ -173,7 +185,11 @@ class MetaView(QMainWindow):
                     )
 
                     def finish_edit():
-                        new_label = make_label(line_edit.text(), layoutH, key)
+                        new_text = line_edit.text()
+                        # Update the categories data structure
+                        self.categories[cat][key] = new_text
+                        
+                        new_label = make_label(new_text, layoutH, key, cat)
                         layoutH.removeWidget(line_edit)
                         line_edit.deleteLater()
                         layoutH.insertWidget(
@@ -234,23 +250,41 @@ class MetaView(QMainWindow):
 
     def categorize_metadata(self, metadata):
         categories = {cat: {} for cat in self.categories_dict}
+        display_to_backend = {cat: {} for cat in self.categories_dict}
         uncategorized = {}
+        uncategorized_map = {}
 
         for key, value in metadata.items():
             display_key = extra_data.rename_dict.get(key, key)
             found = False
             for cat, keys in self.categories_dict.items():
                 if key in keys:
+                    # unique display keys
+                    orig_display_key = display_key
+                    i = 1
+                    while display_key in categories[cat]:
+                        display_key = f"{orig_display_key} ({i})"
+                        i += 1
                     categories[cat][display_key] = value
+                    display_to_backend[cat][display_key] = key
                     found = True
                     break
             if not found:
+                orig_display_key = display_key
+                i = 1
+                while display_key in uncategorized:
+                    display_key = f"{orig_display_key} ({i})"
+                    i += 1
                 uncategorized[display_key] = value
+                uncategorized_map[display_key] = key
 
         if uncategorized:
             categories["Other"] = uncategorized
+            display_to_backend["Other"] = uncategorized_map
 
         categories = {cat: items for cat, items in categories.items() if items}
+        display_to_backend = {cat: items for cat, items in display_to_backend.items() if items}
+        self.display_to_backend = display_to_backend
         return categories
 
     def add_property(self, category, property, value):
@@ -285,6 +319,30 @@ class MetaView(QMainWindow):
         msg.setInformativeText(text)
         msg.setWindowTitle("Error")
         msg.exec_()
+
+    def pre_save(self):
+        new_data = {}
+        for cat, items in self.categories.items():
+            for display_key, value in items.items():
+                # only update strings
+                if isinstance(value, str):
+                    backend_key = self.display_to_backend.get(cat, {}).get(display_key)
+                    # skip keys that were added afterwards and check if value changed
+                    if (
+                        backend_key
+                        and backend_key in self.original_backend_keys
+                        and backend_key not in READ_ONLY_KEYS
+                        and self.original_values.get(backend_key) != value  # only changed values
+                    ):
+                        new_data[backend_key] = value
+                        print(f"{display_key}: {self.original_values.get(backend_key)} -> {value}")
+        return new_data
+
+    def save_metadata(self):
+        print("Saving new metadata...")
+        new_data = self.pre_save()
+        result = exiftool.write_metadata(self.file_path, new_data)
+        print(result)
 
     def quit(self):
         print("Quitting...")
