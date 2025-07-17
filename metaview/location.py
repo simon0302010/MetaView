@@ -1,6 +1,7 @@
 import re
 
 import reverse_geocoder as rg
+import country_converter as coco
 
 
 def convert_dms(dms):
@@ -24,7 +25,7 @@ def get_location(lat, lon):
     results = rg.search((lat, lon))
     if results:
         info = results[0]
-        return info["name"], info["admin1"], info["cc"]
+        return info["name"], info["admin1"], coco.convert(info["cc"], to="name_short")
     return None, None, None
 
 
@@ -35,4 +36,5 @@ if __name__ == "__main__":
     city, region, country_code = get_location(
         convert_dms(latitude), convert_dms(longitude)
     )
+    country_code = coco.convert(country_code, to="name_short")
     print(f"City: {city}, Region: {region}, Country: {country_code}")
