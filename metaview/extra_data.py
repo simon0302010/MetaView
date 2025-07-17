@@ -11,6 +11,7 @@ categories_dict = {
         "FileModifyDate",
         "FileAccessDate",
         "Subject",
+        "Comment",
     ],
     "Camera": [
         "Make",
@@ -200,6 +201,7 @@ rename_dict = {
     "FileModifyDate": "File Modify Date",
     "FileAccessDate": "File Access Date",
     "Subject": "Subject",
+    "Comment": "Comment",
     # Camera
     "Make": "Manufacturer",
     "Model": "Camera Model",
