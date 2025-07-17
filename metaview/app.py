@@ -1,4 +1,7 @@
 import sys
+import logging
+
+from colorama import Fore, Style, init
 
 from PyQt5.QtCore import QSize, Qt, pyqtSignal
 from PyQt5.QtGui import QFontMetrics, QPixmap
@@ -31,6 +34,26 @@ READ_ONLY_KEYS = {
     "File Type",
     "Megapixels"
 }
+
+init(autoreset=True)
+
+class ColorFormatter(logging.Formatter):
+    COLORS = {
+        logging.DEBUG: Fore.CYAN,
+        logging.INFO: Fore.GREEN,
+        logging.WARNING: Fore.YELLOW,
+        logging.ERROR: Fore.RED,
+        logging.CRITICAL: Fore.RED + Style.BRIGHT,
+    }
+
+    def format(self, record):
+        color = self.COLORS.get(record.levelno, "")
+        message = super().format(record)
+        return f"{color}{message}{Style.RESET_ALL}"
+
+handler = logging.StreamHandler()
+handler.setFormatter(ColorFormatter("%(asctime)s [%(levelname)s] %(message)s"))
+logging.basicConfig(level=logging.INFO, handlers=[handler])
 
 
 class ClickableLabel(QLabel):
@@ -80,11 +103,13 @@ class MetaView(QMainWindow):
         if not self.file_path:
             return
 
-        print(f"Selected File: {self.file_path}")
+        logging.info(f"Selected File: {self.file_path}")
 
         self.metadata = exiftool.get_metadata(self.file_path)
         self.original_backend_keys = set(self.metadata.keys())
         self.original_values = {}
+        
+        logging.debug(self.metadata)
 
         # format values better
         if "GPSImgDirection" in self.metadata:
@@ -297,7 +322,7 @@ class MetaView(QMainWindow):
         ):
             del self.categories[str(category)][str(property)]
         else:
-            print(
+            logging.warning(
                 f"Unable to delete property '{property}' from category '{category}': Property does not exist."
             )
 
@@ -308,7 +333,7 @@ class MetaView(QMainWindow):
         ):
             self.categories[str(category)][str(property)] = value
         else:
-            print(
+            logging.warning(
                 f"Unable to update property '{property}' from category '{category}': Property does not exist."
             )
 
@@ -335,17 +360,17 @@ class MetaView(QMainWindow):
                         and self.original_values.get(backend_key) != value  # only changed values
                     ):
                         new_data[backend_key] = value
-                        print(f"{display_key}: {self.original_values.get(backend_key)} -> {value}")
+                        logging.debug(f"{display_key}: {self.original_values.get(backend_key)} -> {value}")
         return new_data
 
     def save_metadata(self):
-        print("Saving new metadata...")
+        logging.info("Saving new metadata...")
         new_data = self.pre_save()
         result = exiftool.write_metadata(self.file_path, new_data)
-        print(result)
+        logging.info(result)
 
     def quit(self):
-        print("Quitting...")
+        logging.info("Quitting...")
         sys.exit(0)
 
 

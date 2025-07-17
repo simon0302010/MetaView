@@ -14,7 +14,8 @@ authors = [
 ]
 dependencies = [
     "PyQt5",
-    "reverse_geocoder"
+    "reverse_geocoder",
+    "colorama"
 ]
 classifiers = [
     "Operating System :: POSIX :: Linux",
