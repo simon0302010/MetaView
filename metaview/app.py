@@ -1,11 +1,12 @@
 import os
+import re
 import sys
 import logging
 
 from colorama import Fore, Style, init
 
 from PyQt5.QtCore import QSize, Qt, pyqtSignal
-from PyQt5.QtGui import QFontMetrics, QPixmap
+from PyQt5.QtGui import QFontMetrics, QPixmap, QTransform
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -35,6 +36,8 @@ READ_ONLY_KEYS = {
     "File Type",
     "Megapixels"
 }
+
+# TODO: better styling for cli
 
 init(autoreset=True)
 
@@ -143,6 +146,17 @@ class MetaView(QMainWindow):
         # add preview image
         image_label = QLabel()
         pixmap = QPixmap(self.file_path)
+        
+        if "Orientation" in self.metadata:
+            orientation = self.metadata["Orientation"]
+            logging.debug(f"Orientation: {orientation}")
+            re_result = re.findall("(\d+)", str(orientation))
+            if len(re_result):
+                orientation = int(re_result[0])
+                im_transform = QTransform()
+                im_transform.rotate(90)
+                pixmap = pixmap.transformed(im_transform)
+        
         image_label.setPixmap(pixmap)
         image_label.setScaledContents(True)
         max_height = 128
@@ -154,6 +168,8 @@ class MetaView(QMainWindow):
             image_label.setMaximumWidth(width)
         else:
             image_label.setMaximumWidth(max_height)  # fallback if pixmap is invalid
+
+        # TODO: correct rotation based on EXIF Orientation tag
 
         self.add_property("General", "Image Preview", image_label)
 

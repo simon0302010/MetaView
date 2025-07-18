@@ -32,6 +32,7 @@ categories_dict = {
         "FOV",
         "HyperfocalDistance",
         "ShootingMode",
+        "CameraType",
     ],
     "Exposure": [
         "ExposureTime",
@@ -206,7 +207,7 @@ rename_dict = {
     "Make": "Manufacturer",
     "Model": "Camera Model",
     "SerialNumber": "Serial Number",
-    "LensID": "Lens ID",
+    "LensID": "Lens",
     "LensMake": "Lens Manufacturer",
     "ShutterSpeed": "Shutter Speed",
     "Aperture": "Aperture",
@@ -221,6 +222,7 @@ rename_dict = {
     "FOV": "Field of View",
     "HyperfocalDistance": "Hyperfocal Distance",
     "ShootingMode": "Shooting Mode",
+    "CameraType": "Camera Type",
     # Exposure
     "ExposureTime": "Exposure Time",
     "ExposureCompensation": "Exposure Compensation",

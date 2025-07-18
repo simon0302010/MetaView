@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MetaView"
-version = "0.4.0"
+version = "0.4.1"
 description = "Viewer and Editor for Image Metadata"
 readme = "README.md"
 requires-python = ">=3.8,<=3.14"
@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pyopengl", "numpy-stl", "pyqtgraph"]
+test = ["pyopengl", "numpy-stl", "pyqtgraph", "numpy", "imageio", "vispy", "ruff", "black", "isort", "pytest"]
 
 [project.urls]
 Homepage = "https://github.com/simon0302010/MetaView"
