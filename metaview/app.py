@@ -169,8 +169,6 @@ class MetaView(QMainWindow):
         else:
             image_label.setMaximumWidth(max_height)  # fallback if pixmap is invalid
 
-        # TODO: correct rotation based on EXIF Orientation tag
-
         self.add_property("General", "Image Preview", image_label)
 
         # add location as text
