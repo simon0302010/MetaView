@@ -45,8 +45,25 @@ class SimpleEarth(QtWidgets.QMainWindow):
         mesh.transform = scene.transforms.MatrixTransform()
         mesh.transform.rotate(270, (1, 0, 0))
         mesh.transform.rotate(90, (0, 0, 1))
-        
         view.add(mesh)
+        
+        # add berlin marker
+        lat, lon = 52.5200, 13.4050
+        lat_rad, lon_rad = np.radians(lat), np.radians(lon)
+        # use same coordinates as texture mapping
+        x = 1.02 * np.cos(lat_rad) * (-np.cos(lon_rad))
+        y = -1.02 * np.sin(lat_rad)
+        z = 1.02 * np.cos(lat_rad) * (-np.sin(lon_rad))
+        
+        marker = scene.visuals.Markers(pos=np.array([[x, y, z]]), size=10, face_color='red')
+        # apply same transform as earth mesh
+        marker.transform = scene.transforms.MatrixTransform()
+        marker.transform.rotate(270, (1, 0, 0))
+        marker.transform.rotate(90, (0, 0, 1))
+        marker.transform = scene.transforms.MatrixTransform()
+        marker.transform.rotate(270, (1, 0, 0))
+        marker.transform.rotate(90, (0, 0, 1))
+        view.add(marker)
         
         self.setCentralWidget(self.canvas.native)
     
@@ -74,18 +91,15 @@ class SimpleEarth(QtWidgets.QMainWindow):
         for face_idx in seam_faces:
             face = new_faces[face_idx]
             face_u = new_texcoords[face, 0]
-            
             for j in range(3):
                 if face_u[j] < 0.5:
                     # create vertex
                     new_vertex_idx = len(new_vertices)
                     new_vertices = np.vstack((new_vertices, vertices[face[j]]))
-                    
                     # add texcoord
                     new_tex = texcoords[face[j]].copy()
                     new_tex[0] += 1.0
                     new_texcoords = np.vstack((new_texcoords, new_tex))
-                    
                     # update face
                     new_faces[face_idx, j] = new_vertex_idx
         
