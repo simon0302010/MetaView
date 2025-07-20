@@ -50,9 +50,9 @@ class EarthWidget(QtWidgets.QWidget):
 
         # add marker
         lat_rad, lon_rad = np.radians(lat), np.radians(lon)
-        x = 1.02 * np.cos(lat_rad) * (-np.cos(lon_rad))
-        y = -1.02 * np.sin(lat_rad)
-        z = 1.02 * np.cos(lat_rad) * (-np.sin(lon_rad))
+        x = 1.008 * np.cos(lat_rad) * (-np.cos(lon_rad))
+        y = -1.008 * np.sin(lat_rad)
+        z = 1.008 * np.cos(lat_rad) * (-np.sin(lon_rad))
 
         marker = scene.visuals.Markers(pos=np.array([[x, y, z]]), size=10, face_color='red')
         marker.transform = scene.transforms.MatrixTransform()

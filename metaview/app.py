@@ -23,7 +23,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from . import extra_data, location, exiftool
+from . import extra_data, location, exiftool, weather
 from .earth import EarthWidget
 
 READ_ONLY_KEYS = {
@@ -35,7 +35,9 @@ READ_ONLY_KEYS = {
     "Location",
     "Image Size",
     "File Type",
-    "Megapixels"
+    "Megapixels",
+    "Temperature",
+    "Weather"
 }
 
 # TODO: better styling for cli
@@ -188,6 +190,12 @@ class MetaView(QMainWindow):
             earth_widget = EarthWidget(GPSLatitude, GPSLongitude)
             earth_widget.setMaximumHeight(256)
             self.add_property("Location", "Earth View", earth_widget)
+            
+            if "DateTimeOriginal" in self.metadata:
+                temperature, weather_str = weather.get_weather(self.metadata["DateTimeOriginal"], GPSLatitude, GPSLongitude)
+                
+                self.add_property("Date && Time", "Temperature", temperature)
+                self.add_property("Date && Time", "Weather", weather_str)
 
         tab_widget = QTabWidget()
         for category, items in self.categories.items():
