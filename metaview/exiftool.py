@@ -1,6 +1,6 @@
-import subprocess
 import json
 import os
+import subprocess
 
 
 def get_metadata(file_path):

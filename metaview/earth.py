@@ -1,11 +1,13 @@
+import os
+from urllib.request import urlretrieve
+
+import appdirs
+import imageio.v2 as imageio
 import numpy as np
 from PyQt5 import QtWidgets
 from vispy import scene
 from vispy.geometry import create_sphere
 from vispy.visuals.filters import TextureFilter
-import imageio.v2 as imageio
-from urllib.request import urlretrieve
-import os
 
 
 class EarthWidget(QtWidgets.QWidget):
@@ -15,23 +17,32 @@ class EarthWidget(QtWidgets.QWidget):
         self.resize(800, 600)
         self.init_ui(lat, lon)
 
-    def init_ui(self, lat, lon):
+    def init_ui(self, lat, lon):        
         # create canvas
         self.canvas = scene.SceneCanvas(bgcolor="white")
         view = self.canvas.central_widget.add_view()
         view.camera = "arcball"
         view.camera.distance = 3.0
 
-        # download texture
-        texture_path = "earth.jpg"
-        if not os.path.exists(texture_path):
-            url = (
-                "https://www.solarsystemscope.com/textures/download/2k_earth_daymap.jpg"
-            )
-            urlretrieve(url, texture_path)
+        # use cache to save texture
+        cache_dir = appdirs.user_cache_dir("metaview")
+        os.makedirs(cache_dir, exist_ok=True)
+        texture_path = os.path.join(cache_dir, "earth.jpg")
+        url = "https://www.solarsystemscope.com/textures/download/2k_earth_daymap.jpg"
 
-        # load texture
-        earth_texture = np.flipud(imageio.imread(texture_path))
+        # try to download texture
+        if not os.path.exists(texture_path):
+            try:
+                urlretrieve(url, texture_path)
+            except Exception as e:
+                print(f"Could not download earth texture: {e}")
+
+        # load texture (blank if fails)
+        try:
+            earth_texture = np.flipud(imageio.imread(texture_path))
+        except Exception as e:
+            print(f"Could not load earth texture, using blank: {e}")
+            earth_texture = np.ones((512, 1024, 3), dtype=np.uint8) * 200
 
         # create earth
         sphere = create_sphere(rows=128, cols=128, radius=1.0)

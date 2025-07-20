@@ -1,12 +1,13 @@
+import os
 import sys
+from urllib.request import urlretrieve
+
+import imageio.v2 as imageio
 import numpy as np
 from PyQt5 import QtWidgets
 from vispy import scene
 from vispy.geometry import create_sphere
 from vispy.visuals.filters import TextureFilter
-import imageio.v2 as imageio
-from urllib.request import urlretrieve
-import os
 
 
 class SimpleEarth(QtWidgets.QMainWindow):

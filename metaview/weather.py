@@ -1,5 +1,6 @@
-import requests
 from datetime import datetime, timedelta
+
+import requests
 
 from . import extra_data
 
@@ -15,7 +16,6 @@ def get_weather(date_str, lat, lon):
 
 def get_forecast(dt, lat, lon):
     dt = dt.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
-    print(dt)
 
     url = "https://api.open-meteo.com/v1/forecast"
 

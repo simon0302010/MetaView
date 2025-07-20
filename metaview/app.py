@@ -1,10 +1,9 @@
+import logging
 import os
 import re
 import sys
-import logging
 
 from colorama import Fore, Style, init
-
 from PyQt5.QtCore import QSize, Qt, pyqtSignal
 from PyQt5.QtGui import QFontMetrics, QPixmap, QTransform
 from PyQt5.QtWidgets import (
@@ -23,7 +22,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from . import extra_data, location, exiftool, weather
+from . import exiftool, extra_data, location, weather
 from .earth import EarthWidget
 
 READ_ONLY_KEYS = {
@@ -118,6 +117,11 @@ class MetaView(QMainWindow):
                 self, "Open File", "", "Images (*.jpg *.jpeg *.png)"
             )
         if not self.file_path or not os.path.exists(self.file_path):
+            return
+        
+        valid_exts = (".jpg", ".jpeg", ".png")
+        if not self.file_path.lower().endswith(valid_exts):
+            self.display_error("Only .jpg, .jpeg, and .png files are supported (More are to be tested).")
             return
 
         logging.info(f"Selected File: {self.file_path}")
