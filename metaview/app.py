@@ -37,12 +37,13 @@ READ_ONLY_KEYS = {
     "File Type",
     "Megapixels",
     "Temperature",
-    "Weather"
+    "Weather",
 }
 
 # TODO: better styling for cli
 
 init(autoreset=True)
+
 
 class ColorFormatter(logging.Formatter):
     COLORS = {
@@ -57,6 +58,7 @@ class ColorFormatter(logging.Formatter):
         color = self.COLORS.get(record.levelno, "")
         message = super().format(record)
         return f"{color}{message}{Style.RESET_ALL}"
+
 
 handler = logging.StreamHandler()
 handler.setFormatter(ColorFormatter("%(asctime)s [%(levelname)s] %(message)s"))
@@ -94,11 +96,11 @@ class MetaView(QMainWindow):
         save_action = file_menu.addAction("Save")
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self.save_metadata)
-        
+
         save_to_action = file_menu.addAction("Save to")
         save_to_action.setShortcut("Ctrl+Shift+S")
         save_to_action.triggered.connect(self.save_to)
-        
+
         delete_metadata_action = file_menu.addAction("Delete Metadata")
         delete_metadata_action.setShortcut("Ctrl+Del")
         delete_metadata_action.triggered.connect(self.delete_metadata)
@@ -115,10 +117,7 @@ class MetaView(QMainWindow):
             self.file_path, _ = QFileDialog.getOpenFileName(
                 self, "Open File", "", "Images (*.jpg *.jpeg *.png)"
             )
-        if (
-            not self.file_path
-            or not os.path.exists(self.file_path)
-        ):
+        if not self.file_path or not os.path.exists(self.file_path):
             return
 
         logging.info(f"Selected File: {self.file_path}")
@@ -126,12 +125,14 @@ class MetaView(QMainWindow):
         self.metadata = exiftool.get_metadata(self.file_path)
         self.original_backend_keys = set(self.metadata.keys())
         self.original_values = {}
-        
+
         logging.debug(self.metadata)
 
         # format values better
         if "GPSImgDirection" in self.metadata:
-            self.metadata["GPSImgDirection"] = round(self.metadata["GPSImgDirection"], 2)
+            self.metadata["GPSImgDirection"] = round(
+                self.metadata["GPSImgDirection"], 2
+            )
         if "ThumbnailImage" in self.metadata:
             del self.metadata["ThumbnailImage"]
 
@@ -149,7 +150,7 @@ class MetaView(QMainWindow):
         # add preview image
         image_label = QLabel()
         pixmap = QPixmap(self.file_path)
-        
+
         if "Orientation" in self.metadata:
             orientation = self.metadata["Orientation"]
             logging.debug(f"Orientation: {orientation}")
@@ -159,7 +160,7 @@ class MetaView(QMainWindow):
                 im_transform = QTransform()
                 im_transform.rotate(90)
                 pixmap = pixmap.transformed(im_transform)
-        
+
         image_label.setPixmap(pixmap)
         image_label.setScaledContents(True)
         max_height = 128
@@ -186,14 +187,16 @@ class MetaView(QMainWindow):
             location_str = f"{city}, {region}, {country}"
 
             self.add_property("Location", "Location", location_str)
-            
+
             earth_widget = EarthWidget(GPSLatitude, GPSLongitude)
             earth_widget.setMaximumHeight(256)
             self.add_property("Location", "Earth View", earth_widget)
-            
+
             if "DateTimeOriginal" in self.metadata:
-                temperature, weather_str = weather.get_weather(self.metadata["DateTimeOriginal"], GPSLatitude, GPSLongitude)
-                
+                temperature, weather_str = weather.get_weather(
+                    self.metadata["DateTimeOriginal"], GPSLatitude, GPSLongitude
+                )
+
                 self.add_property("Date && Time", "Temperature", temperature)
                 self.add_property("Date && Time", "Weather", weather_str)
 
@@ -252,7 +255,7 @@ class MetaView(QMainWindow):
                         new_text = line_edit.text()
                         # Update the categories data structure
                         self.categories[cat][key] = new_text
-                        
+
                         new_label = make_label(new_text, layoutH, key, cat)
                         layoutH.removeWidget(line_edit)
                         line_edit.deleteLater()
@@ -347,7 +350,9 @@ class MetaView(QMainWindow):
             display_to_backend["Other"] = uncategorized_map
 
         categories = {cat: items for cat, items in categories.items() if items}
-        display_to_backend = {cat: items for cat, items in display_to_backend.items() if items}
+        display_to_backend = {
+            cat: items for cat, items in display_to_backend.items() if items
+        }
         self.display_to_backend = display_to_backend
         return categories
 
@@ -398,7 +403,7 @@ class MetaView(QMainWindow):
                     if os.path.exists(f"{single_path}_original") and not backup:
                         logging.debug("Deleting backup of modified photo.")
                         os.remove(f"{single_path}_original")
-                
+
     def pre_save(self, everything=False):
         new_data = {}
         for cat, items in self.categories.items():
@@ -412,11 +417,14 @@ class MetaView(QMainWindow):
                         and backend_key in self.original_backend_keys
                         and display_key not in READ_ONLY_KEYS
                         and backend_key not in READ_ONLY_KEYS
-                        and self.original_values.get(backend_key) != value  # only changed values
+                        and self.original_values.get(backend_key)
+                        != value  # only changed values
                     ):
                         new_data[backend_key] = value
-                        logging.debug(f"{display_key}: {self.original_values.get(backend_key)} -> {value}")
-                    
+                        logging.debug(
+                            f"{display_key}: {self.original_values.get(backend_key)} -> {value}"
+                        )
+
                     elif (
                         backend_key
                         and backend_key in self.original_backend_keys
@@ -426,7 +434,9 @@ class MetaView(QMainWindow):
                         and everything
                     ):
                         new_data[backend_key] = value
-                        logging.debug(f"{display_key}: {self.original_values.get(backend_key)} -> {value}")
+                        logging.debug(
+                            f"{display_key}: {self.original_values.get(backend_key)} -> {value}"
+                        )
         return new_data
 
     def save_metadata(self, everything=False, save_path=None):
@@ -437,14 +447,14 @@ class MetaView(QMainWindow):
         else:
             result = exiftool.write_metadata(self.file_path, new_data)
         logging.info(result)
-        
+
     def delete_metadata(self, backup=False):
         reply = QMessageBox.question(
             self,
             "Confirm Delete",
             "Do you really want to delete all metadata from the image?",
             QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
             exiftool.delete_metadata(self.file_path)

@@ -7,6 +7,7 @@ import imageio.v2 as imageio
 from urllib.request import urlretrieve
 import os
 
+
 class EarthWidget(QtWidgets.QWidget):
     def __init__(self, lat, lon, parent=None):
         super().__init__(parent)
@@ -16,15 +17,17 @@ class EarthWidget(QtWidgets.QWidget):
 
     def init_ui(self, lat, lon):
         # create canvas
-        self.canvas = scene.SceneCanvas(bgcolor='white')
+        self.canvas = scene.SceneCanvas(bgcolor="white")
         view = self.canvas.central_widget.add_view()
-        view.camera = 'arcball'
+        view.camera = "arcball"
         view.camera.distance = 3.0
 
         # download texture
-        texture_path = 'earth.jpg'
+        texture_path = "earth.jpg"
         if not os.path.exists(texture_path):
-            url = "https://www.solarsystemscope.com/textures/download/2k_earth_daymap.jpg"
+            url = (
+                "https://www.solarsystemscope.com/textures/download/2k_earth_daymap.jpg"
+            )
             urlretrieve(url, texture_path)
 
         # load texture
@@ -39,7 +42,7 @@ class EarthWidget(QtWidgets.QWidget):
         vertices, faces, texcoords = generate_sphere_texcoords(vertices, faces)
 
         # create mesh
-        mesh = scene.visuals.Mesh(vertices=vertices, faces=faces, color='white')
+        mesh = scene.visuals.Mesh(vertices=vertices, faces=faces, color="white")
         mesh.attach(TextureFilter(earth_texture, texcoords=texcoords))
 
         # rotate
@@ -54,7 +57,9 @@ class EarthWidget(QtWidgets.QWidget):
         y = -1.008 * np.sin(lat_rad)
         z = 1.008 * np.cos(lat_rad) * (-np.sin(lon_rad))
 
-        marker = scene.visuals.Markers(pos=np.array([[x, y, z]]), size=10, face_color='red')
+        marker = scene.visuals.Markers(
+            pos=np.array([[x, y, z]]), size=10, face_color="red"
+        )
         marker.transform = scene.transforms.MatrixTransform()
         marker.transform.rotate(270, (1, 0, 0))
         marker.transform.rotate(90, (0, 0, 1))
@@ -63,6 +68,7 @@ class EarthWidget(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.canvas.native)
         self.setLayout(layout)
+
 
 def generate_sphere_texcoords(vertices, faces):
     """Generate texture coordinates for a sphere with seam fixing."""
