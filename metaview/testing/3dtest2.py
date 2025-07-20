@@ -47,8 +47,8 @@ class SimpleEarth(QtWidgets.QMainWindow):
         mesh.transform.rotate(90, (0, 0, 1))
         view.add(mesh)
         
-        # add berlin marker
-        lat, lon = 52.5200, 13.4050
+        # add marker
+        lat, lon = 42.360278, -71.057778
         lat_rad, lon_rad = np.radians(lat), np.radians(lon)
         # use same coordinates as texture mapping
         x = 1.02 * np.cos(lat_rad) * (-np.cos(lon_rad))

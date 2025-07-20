@@ -24,6 +24,7 @@ from PyQt5.QtWidgets import (
 )
 
 from . import extra_data, location, exiftool
+from .earth import EarthWidget
 
 READ_ONLY_KEYS = {
     "Source File",
@@ -183,6 +184,10 @@ class MetaView(QMainWindow):
             location_str = f"{city}, {region}, {country}"
 
             self.add_property("Location", "Location", location_str)
+            
+            earth_widget = EarthWidget(GPSLatitude, GPSLongitude)
+            earth_widget.setMaximumHeight(256)
+            self.add_property("Location", "Earth View", earth_widget)
 
         tab_widget = QTabWidget()
         for category, items in self.categories.items():

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MetaView"
-version = "0.4.1"
+version = "0.5.0"
 description = "Viewer and Editor for Image Metadata"
 readme = "README.md"
 requires-python = ">=3.8,<=3.14"
@@ -16,14 +16,17 @@ dependencies = [
     "PyQt5",
     "reverse_geocoder",
     "colorama",
-    "country-converter"
+    "country-converter",
+    "vispy",
+    "imageio",
+    "numpy"
 ]
 classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 
 [project.optional-dependencies]
-test = ["pyopengl", "numpy-stl", "pyqtgraph", "numpy", "imageio", "vispy", "ruff", "black", "isort", "pytest"]
+test = ["pyopengl", "numpy-stl", "pyqtgraph", "ruff", "black", "isort", "pytest"]
 
 [project.urls]
 Homepage = "https://github.com/simon0302010/MetaView"
