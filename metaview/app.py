@@ -168,7 +168,7 @@ class MetaView(QMainWindow):
         if "Orientation" in self.metadata:
             orientation = self.metadata["Orientation"]
             logging.debug(f"Orientation: {orientation}")
-            re_result = re.findall("(\d+)", str(orientation))
+            re_result = re.findall(r"(\d+)", str(orientation))
             if len(re_result):
                 orientation = int(re_result[0])
                 im_transform = QTransform()
