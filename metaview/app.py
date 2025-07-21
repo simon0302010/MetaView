@@ -3,9 +3,11 @@ import os
 import re
 import sys
 
+import importlib.resources
+
 from colorama import Fore, Style, init
 from PyQt5.QtCore import QSize, Qt, pyqtSignal
-from PyQt5.QtGui import QFontMetrics, QPixmap, QTransform
+from PyQt5.QtGui import QFontMetrics, QPixmap, QTransform, QIcon
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -72,11 +74,15 @@ class ClickableLabel(QLabel):
         super().mouseDoubleClickEvent(event)
 
 
+TRUNCATION_LENGTH = 30
+
 class MetaView(QMainWindow):
     def __init__(self, file_path=None):
         super().__init__()
         self.setWindowTitle("MetaView")
-        self.setMinimumSize(QSize(400, 550))
+        self.setMinimumSize(QSize(500, 600))
+        with importlib.resources.path("metaview.assets", "MetaView128.png") as icon_path:
+            self.setWindowIcon(QIcon(str(icon_path)))
 
         label = QLabel("Open a file to get started.")
         label.setAlignment(Qt.AlignCenter)
@@ -136,6 +142,10 @@ class MetaView(QMainWindow):
         if "GPSImgDirection" in self.metadata:
             self.metadata["GPSImgDirection"] = round(
                 self.metadata["GPSImgDirection"], 2
+            )
+        if "GPSSpeed" in self.metadata:
+            self.metadata["GPSSpeed"] = round(
+                self.metadata["GPSSpeed"], 2
             )
         if "ThumbnailImage" in self.metadata:
             del self.metadata["ThumbnailImage"]
@@ -318,6 +328,11 @@ class MetaView(QMainWindow):
             tab_widget.addTab(scroll, category)
 
         self.setCentralWidget(tab_widget)
+        new_title = self.file_path
+        if len(new_title) >= TRUNCATION_LENGTH:
+            new_title = "..." + new_title[-TRUNCATION_LENGTH:]
+        new_title = f"MetaView ({new_title})"
+        self.setWindowTitle(new_title)
 
     def categorize_metadata(self, metadata):
         categories = {cat: {} for cat in self.categories_dict}

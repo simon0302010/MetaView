@@ -5,7 +5,7 @@ import subprocess
 
 def get_metadata(file_path):
     result = subprocess.run(
-        ["exiftool", "-j", file_path], capture_output=True, text=True
+        ["exiftool", "-j", "-b", file_path], capture_output=True, text=True
     )
     metadata = json.loads(result.stdout)
     return metadata[0] if metadata else {}

@@ -33,6 +33,7 @@ categories_dict = {
         "HyperfocalDistance",
         "ShootingMode",
         "CameraType",
+        "FocusDistanceRange",
     ],
     "Exposure": [
         "ExposureTime",
@@ -223,6 +224,7 @@ rename_dict = {
     "HyperfocalDistance": "Hyperfocal Distance",
     "ShootingMode": "Shooting Mode",
     "CameraType": "Camera Type",
+    "FocusDistanceRange": "Focus Distance Range",
     # Exposure
     "ExposureTime": "Exposure Time",
     "ExposureCompensation": "Exposure Compensation",
